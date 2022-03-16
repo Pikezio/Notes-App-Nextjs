@@ -1,4 +1,4 @@
-import Collective from "../models/Collective";
+//import Collective from "../models/Collective";
 
 //Route: /collectives - POST, GET
 
@@ -16,6 +16,11 @@ async function getCollectives(req) {
   return { owned: ownedCollectives, member: memberInCollectives };
 }
 
+async function getCollective(id) {
+  const collective = await Collective.findById(id);
+  return collective;
+}
+
 async function postCollective(req) {
   const createdCollective = await Collective.create({
     ...req.body,
@@ -28,4 +33,5 @@ async function postCollective(req) {
 module.exports = {
   getCollectives,
   postCollective,
+  getCollective,
 };

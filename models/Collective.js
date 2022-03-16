@@ -10,6 +10,7 @@ const CollectiveSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    songs: [String],
     members: [
       {
         userId: {

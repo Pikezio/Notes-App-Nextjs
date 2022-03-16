@@ -2,9 +2,12 @@ import React, { useRef, useState } from "react";
 import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import FileUpload from "../../../components/files/FileUpload";
 import { useRouter } from "next/router";
+import { useSession, getSession } from "next-auth/react";
+import { getCollective } from "../../../../controllers/collectiveController";
 
-export default function CreateSong() {
+export default function CreateSong({ owner }) {
   const router = useRouter();
+  const { collectiveId } = router.query;
 
   // Form field references
   const titleRef = useRef();
@@ -13,12 +16,24 @@ export default function CreateSong() {
 
   const [parts, setParts] = useState();
 
+  const url = `/api/collectives/${collectiveId}/songs`;
+
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
   // Updates state, when files change
   function handleFileChange(e) {
-    let newState = Array.from(e.target.files).map((f) => ({
-      file: f,
-      instrument: "undefined",
-    }));
+    let newState = Array.from(e.target.files).map((f) => {
+      return {
+        file: f,
+        instrument: "undefined",
+      };
+    });
     setParts(newState);
   }
 
@@ -26,25 +41,11 @@ export default function CreateSong() {
   function handleDropDownChange(e, partId) {
     const selectedInstrument = e.target.value;
     let newParts = [...parts];
-
-    // Changing the selected part
     newParts[partId].instrument = selectedInstrument;
     setParts(newParts);
   }
 
-  // Submits the form
-  const submitForm = async () => {
-    const data = {
-      title: titleRef.current.value,
-      composer: composerRef.current.value,
-      arranger: arrangerRef.current.value,
-      parts,
-    };
-
-    console.log(data);
-
-    const url = `/api/collectives/${collectiveId}/`;
-
+  const submitForm = async (data) => {
     try {
       const res = await fetch(url, {
         method: "POST",
@@ -53,17 +54,30 @@ export default function CreateSong() {
         },
         body: JSON.stringify(data),
       });
-
-      // Throw error with status code in case Fetch API req failed
-      if (!res.ok) {
-        throw new Error(res.status);
-      }
-
+      if (!res.ok) throw new Error(res.status);
       router.push("/");
     } catch (error) {
       console.log(error);
-      //setMessage("Failed to add pet");
     }
+  };
+
+  const constructData = async () => {
+    const songData = {
+      title: titleRef.current.value,
+      composer: composerRef.current.value,
+      arranger: arrangerRef.current.value,
+    };
+
+    const base64parts = await Promise.all(
+      parts.map(async (item) => {
+        const base64 = await toBase64(item.file);
+        item.file = base64;
+        return item;
+      })
+    );
+    console.log(fullObject);
+    const fullObject = { ...songData, parts: base64parts };
+    await submitForm(fullObject);
   };
 
   return (
@@ -102,10 +116,27 @@ export default function CreateSong() {
           handleFileChange={handleFileChange}
           parts={parts}
         />
-        <Button className="mt-3" onClick={submitForm}>
+        <Button className="mt-3" onClick={constructData}>
           Įrašyti
         </Button>
       </Form>
     </Container>
   );
 }
+
+// export async function getServerSideProps(context) {
+//   const collective = await getCollective(context.query.collectiveId);
+//   const session = await getSession(context);
+
+//   let owner = false;
+//   if (session.userId === collective.owner) {
+//     console.log("User is the owner");
+//     owner = true;
+//   }
+
+//   return {
+//     props: {
+//       owner: owner,
+//     },
+//   };
+// }

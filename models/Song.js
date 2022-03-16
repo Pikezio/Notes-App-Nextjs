@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import Part from "./Part";
 
 const SongSchema = new mongoose.Schema({
   title: {
@@ -12,7 +11,22 @@ const SongSchema = new mongoose.Schema({
   arranger: {
     type: String,
   },
-  parts: [{ type: Part }],
+  parts: [
+    {
+      instrument: {
+        type: String,
+        required: true,
+      },
+      file: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
+  collectiveId: {
+    type: String,
+    required: true,
+  },
 });
 
 export default mongoose.models.Song || mongoose.model("Song", SongSchema);

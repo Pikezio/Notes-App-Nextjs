@@ -14,6 +14,7 @@ const handler = nc({
     res.status(404).end("Page is not found");
   },
 })
+  .use(async (req, res, next) => await connectToDB(req, res, next))
   .use(async (req, res, next) => {
     await isUserConnected(req, res, next);
   })

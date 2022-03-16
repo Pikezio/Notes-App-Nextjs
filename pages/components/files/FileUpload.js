@@ -26,6 +26,7 @@ export default function FileUpload({
     ? parts.map((part, partId) => (
         <ListGroup.Item key={partId}>
           <Row>
+            {console.log(part)}
             <Col>{part.file.name}</Col>
             <Col md="auto">
               <Form.Select onChange={(e) => handleDropDownChange(e, partId)}>

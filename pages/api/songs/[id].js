@@ -1,6 +1,5 @@
-import Song from "../../../models/Song";
-import { connectToDB } from "../../../../middleware/connectToDB";
-import { getSong } from "../../../../controllers/songController";
+import { connectToDB } from "../../../middleware/connectToDB";
+import { getSong } from "../../../controllers/songController";
 import nc from "next-connect";
 
 const handler = nc({
@@ -19,10 +18,8 @@ const handler = nc({
   //     await isUserConnected(req, res, next);
   //   })
   .get(async (req, res) => {
-    // GET ALL SONGS
-    // const result = await getSong(id);
-    // res.send(result);
-    res.send(200);
+    const result = await getSong(req);
+    res.send(result);
   });
 
 export default handler;
