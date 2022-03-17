@@ -14,9 +14,6 @@ const handler = nc({
   .use(async (req, res, next) => {
     await connectToDB(req, res, next);
   })
-  //   .use(async (req, res, next) => {
-  //     await isUserConnected(req, res, next);
-  //   })
   .get(async (req, res) => {
     const result = await getSong(req);
     res.send(result);

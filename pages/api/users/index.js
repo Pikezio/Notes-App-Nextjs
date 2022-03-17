@@ -1,6 +1,6 @@
-import { connectToDB } from "../../../../middleware/connectToDB";
-import { getSong } from "../../../../controllers/songController";
 import nc from "next-connect";
+import { connectToDB } from "../../../middleware/connectToDB";
+import { createUser } from "../../../controllers/userController";
 
 const handler = nc({
   onError: (err, req, res, next) => {
@@ -14,11 +14,9 @@ const handler = nc({
   .use(async (req, res, next) => {
     await connectToDB(req, res, next);
   })
-  .get(async (req, res) => {
-    // GET ALL SONGS
-    // const result = await getSong(id);
-    // res.send(result);
-    res.send(200);
+  .post(async (req, res) => {
+    const user = await createUser(req);
+    res.send(user);
   });
 
 export default handler;

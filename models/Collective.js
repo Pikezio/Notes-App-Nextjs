@@ -28,6 +28,7 @@ const CollectiveSchema = new mongoose.Schema(
         },
       },
     ],
+    instruments: [String],
   },
   {
     timestamps: true,

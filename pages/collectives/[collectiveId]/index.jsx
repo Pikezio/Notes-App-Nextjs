@@ -22,16 +22,20 @@ function Collective({ songs }) {
       <Link href={`${collectiveId}/songs/create`}>
         <a>Pridėti kūrinį</a>
       </Link>
+      <p>
+        <Link href={`${collectiveId}/instruments`}>
+          <a>Redaguoti instrumentus</a>
+        </Link>
+      </p>
     </div>
   );
 }
 
 export async function getServerSideProps(context) {
-  //const session = await getSession(context);
-  //const data = await fetch(`${server}/api/users/${session.userId}/collectives`);
   const data = await fetch(
     `${server}/api/collectives/${context.query.collectiveId}/songs`
   );
+
   const songs = await data.json();
 
   return {

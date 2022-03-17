@@ -3,7 +3,6 @@ import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import FileUpload from "../../../components/files/FileUpload";
 import { useRouter } from "next/router";
 import { useSession, getSession } from "next-auth/react";
-import { getCollective } from "../../../../controllers/collectiveController";
 
 export default function CreateSong({ owner }) {
   const router = useRouter();
@@ -28,9 +27,9 @@ export default function CreateSong({ owner }) {
 
   // Updates state, when files change
   function handleFileChange(e) {
-    let newState = Array.from(e.target.files).map((f) => {
+    let newState = Array.from(e.target.files).map((file) => {
       return {
-        file: f,
+        file: file,
         instrument: "undefined",
       };
     });
@@ -123,20 +122,3 @@ export default function CreateSong({ owner }) {
     </Container>
   );
 }
-
-// export async function getServerSideProps(context) {
-//   const collective = await getCollective(context.query.collectiveId);
-//   const session = await getSession(context);
-
-//   let owner = false;
-//   if (session.userId === collective.owner) {
-//     console.log("User is the owner");
-//     owner = true;
-//   }
-
-//   return {
-//     props: {
-//       owner: owner,
-//     },
-//   };
-// }

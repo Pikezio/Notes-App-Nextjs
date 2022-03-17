@@ -1,8 +1,6 @@
 import nc from "next-connect";
-import { isUserConnected } from "../../../../middleware/isUserAuthenticated";
 import { connectToDB } from "../../../../middleware/connectToDB";
 import { postSong, getSongs } from "../../../../controllers/songController";
-import { uploadMiddleware } from "../../../../middleware/uploadMiddleware";
 
 const handler = nc({
   onError: (err, req, res, next) => {
@@ -16,9 +14,6 @@ const handler = nc({
   .use(async (req, res, next) => {
     await connectToDB(req, res, next);
   })
-  //   .use(async (req, res, next) => {
-  //     await isUserConnected(req, res, next);
-  //   })
   .get(async (req, res) => {
     const result = await getSongs(req);
     res.send(result);

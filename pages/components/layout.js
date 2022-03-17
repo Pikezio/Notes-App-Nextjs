@@ -49,7 +49,7 @@ export function CustomNavbar() {
               </NavDropdown>
             </>
           ) : (
-            <Nav.Link onClick={() => signIn("google")}>Prisijungti</Nav.Link>
+            <Nav.Link onClick={signIn}>Prisijungti</Nav.Link>
           )}
         </Navbar.Collapse>
       </Container>
