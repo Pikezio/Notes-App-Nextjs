@@ -1,9 +1,10 @@
 import { getSession } from "next-auth/react";
 
 // Checks if there is a userId in the session and adds it to req.userId
-export async function isUserConnected(req, res, next) {
+export async function isUserAuthenticated(req, res, next) {
   const session = await getSession({ req });
 
+  console.log("From mid: " + session);
   // Error response and message
   if (!session) {
     req.userId = "Test ID";

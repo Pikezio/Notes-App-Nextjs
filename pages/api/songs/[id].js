@@ -1,6 +1,7 @@
 import { connectToDB } from "../../../middleware/connectToDB";
 import { getSong } from "../../../controllers/songController";
 import nc from "next-connect";
+import { isUserAuthenticated } from "../../../middleware/isUserAuthenticated";
 
 const handler = nc({
   onError: (err, req, res, next) => {
@@ -11,9 +12,7 @@ const handler = nc({
     res.status(404).end("Page is not found");
   },
 })
-  .use(async (req, res, next) => {
-    await connectToDB(req, res, next);
-  })
+  .use(async (req, res, next) => await connectToDB(req, res, next))
   .get(async (req, res) => {
     const result = await getSong(req);
     res.send(result);

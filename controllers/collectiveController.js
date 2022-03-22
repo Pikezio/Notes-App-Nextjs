@@ -1,4 +1,5 @@
 import Collective from "../models/Collective";
+import { getSession } from "next-auth/react";
 
 //Route: /collectives - POST, GET
 
@@ -13,7 +14,10 @@ async function getCollectives(req) {
     },
     "id title"
   );
-  return { owned: ownedCollectives, member: memberInCollectives };
+  console.log({ owned: ownedCollectives, member: memberInCollectives });
+  return JSON.stringify({
+    data: { owned: ownedCollectives, member: memberInCollectives },
+  });
 }
 
 async function getCollective(id) {

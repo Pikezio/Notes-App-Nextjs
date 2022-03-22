@@ -1,10 +1,9 @@
 import React from "react";
-import { getSession } from "next-auth/react";
-import { server } from "../../util/urlConfig";
 import Link from "next/link";
+import { getSession } from "next-auth/react";
+import { getCollectives } from "../../controllers/collectiveController";
 
 function ListOfCollectives({ owned, member }) {
-  console.log({ owned, member });
   return (
     <div>
       <div>
@@ -33,14 +32,14 @@ function ListOfCollectives({ owned, member }) {
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
-
-  const data = await fetch(`${server}/api/collectives`);
-  const collectives = await data.json();
+  context.req.userId = session.userId;
+  const response = await getCollectives(context.req);
+  const data = JSON.parse(response).data;
 
   return {
     props: {
-      owned: collectives.owned,
-      member: collectives.member,
+      owned: data.owned,
+      member: data.member,
     },
   };
 }

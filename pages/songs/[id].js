@@ -2,7 +2,11 @@ import { server } from "../../util/urlConfig";
 import React, { useEffect, useRef } from "react";
 
 export default function SongDetails({ song }) {
-  return <embed src={song.parts[0].file} width="100%" height="2000px" />;
+  const parts = song.parts.map((p, idx) => (
+    <embed key={idx} src={p.file} width="80%" height="auto" />
+  ));
+
+  return parts;
 }
 
 export async function getServerSideProps(context) {

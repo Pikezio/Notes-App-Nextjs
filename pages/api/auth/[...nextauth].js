@@ -61,13 +61,4 @@ export default NextAuth({
       return session;
     },
   },
-  events: {
-    // async signIn(message) {
-    //   // console.log(message);
-    // },
-    // async session(message) {
-    //   console.log("async session event: ");
-    //   console.log(message);
-    // },
-  },
 });
