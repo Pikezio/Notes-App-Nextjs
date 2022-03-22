@@ -6,13 +6,13 @@ import { RecoilRoot } from "recoil";
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
-    <RecoilRoot>
-      <SessionProvider session={session}>
+    <SessionProvider session={session}>
+      <RecoilRoot>
         <Layout>
           <Component {...pageProps} />
         </Layout>
-      </SessionProvider>
-    </RecoilRoot>
+      </RecoilRoot>
+    </SessionProvider>
   );
 }
 

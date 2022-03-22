@@ -1,20 +1,14 @@
 import Collective from "../models/Collective";
-import { getSession } from "next-auth/react";
-
 //Route: /collectives - POST, GET
 
-async function getCollectives(req) {
-  const ownedCollectives = await Collective.find(
-    { owner: req.userId },
-    "id title"
-  );
+async function getCollectives(userId) {
+  const ownedCollectives = await Collective.find({ owner: userId }, "id title");
   const memberInCollectives = await Collective.find(
     {
-      "members.userId": req.userId,
+      "members.userId": userId,
     },
     "id title"
   );
-  console.log({ owned: ownedCollectives, member: memberInCollectives });
   return JSON.stringify({
     data: { owned: ownedCollectives, member: memberInCollectives },
   });
@@ -34,12 +28,15 @@ async function postCollective(req) {
   return createdCollective;
 }
 
-async function getInstruments(req) {
-  const { collectiveId } = req.query;
+async function getInstruments(collectiveId) {
+  const instruments = await Collective.findById(collectiveId, "instruments");
+  return JSON.stringify(instruments);
+}
+
+async function getInstrumentsJson(collectiveId) {
   const instruments = await Collective.findById(collectiveId, "instruments");
   return instruments;
 }
-
 async function postInstruments(req) {
   const { collectiveId } = req.query;
   const instruments = await Collective.findByIdAndUpdate(collectiveId, {
@@ -54,4 +51,5 @@ module.exports = {
   getCollective,
   getInstruments,
   postInstruments,
+  getInstrumentsJson,
 };

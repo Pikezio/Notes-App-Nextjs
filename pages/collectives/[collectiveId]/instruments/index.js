@@ -5,6 +5,7 @@ import { Button, Container, Form, ListGroup } from "react-bootstrap";
 import { resetServerContext } from "react-beautiful-dnd";
 import { server } from "../../../../util/urlConfig";
 import { useRouter } from "next/router";
+import { getInstruments } from "../../../../controllers/collectiveController";
 
 resetServerContext();
 
@@ -120,10 +121,8 @@ export default function EditInstrumentList({ instruments }) {
 }
 
 export async function getServerSideProps(context) {
-  const data = await fetch(
-    `${server}/api/collectives/${context.query.collectiveId}/instruments`
-  );
-  const instruments = await data.json();
+  const response = await getInstruments(context.query.collectiveId);
+  const instruments = await JSON.parse(response);
 
   return {
     props: {

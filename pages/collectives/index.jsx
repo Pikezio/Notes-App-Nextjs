@@ -32,8 +32,7 @@ function ListOfCollectives({ owned, member }) {
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
-  context.req.userId = session.userId;
-  const response = await getCollectives(context.req);
+  const response = await getCollectives(session.userId);
   const data = JSON.parse(response).data;
 
   return {

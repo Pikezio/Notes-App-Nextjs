@@ -1,5 +1,6 @@
 import { server } from "../../util/urlConfig";
 import React, { useEffect, useRef } from "react";
+import { getSong } from "../../controllers/songController";
 
 export default function SongDetails({ song }) {
   const parts = song.parts.map((p, idx) => (
@@ -10,8 +11,9 @@ export default function SongDetails({ song }) {
 }
 
 export async function getServerSideProps(context) {
-  const data = await fetch(`${server}/api/songs/${context.query.id}`);
-  const song = await data.json();
+  const response = await getSong(context.query.id);
+  const song = JSON.parse(response);
+
   return {
     props: {
       song,

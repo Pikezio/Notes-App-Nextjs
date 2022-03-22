@@ -1,9 +1,41 @@
 import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useSetRecoilState } from "recoil";
+import { instrumentState, instrumentListState } from "../../atoms";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { server } from "../../util/urlConfig";
+import { useRouter } from "next/router";
 
 export default function CustomNavbar() {
   const { data: session } = useSession();
+  const router = useRouter();
+  const { collectiveId } = router.query;
+  const { pathname } = router;
+  const [instruments, setInstruments] = useState([]);
+  const setInstrument = useSetRecoilState(instrumentState);
+  // const [instrumentList, setInstrumentList] =
+  //   useRecoilState(instrumentListState);
+
+  // When pathname changes
+  useEffect(() => {
+    console.log(pathname);
+  }, [pathname]);
+
+  // When collectiveId changes
+  useEffect(() => {
+    if (collectiveId) {
+      const getInstruments = async () => {
+        const response = await axios.get(
+          `${server}/api/collectives/${collectiveId}/instruments`
+        );
+        setInstruments(response.data.instruments);
+      };
+      getInstruments();
+    }
+  }, [collectiveId]);
+
   return (
     <Navbar>
       <Container>
@@ -24,19 +56,17 @@ export default function CustomNavbar() {
                 </Link>
               </Nav>
 
-              <select name="collective" id="collective">
-                <option value="1">Collective 1</option>
-                <option value="2">Collective 2</option>
-                <option value="3">Collective 3</option>
-              </select>
-
-              <select name="part" id="part">
-                <option value="1">Part 1</option>
-                <option value="2">Part 2</option>
-                <option value="3">Part 3</option>
-                <option value="3">Part 4</option>
-                <option value="3">Part 5</option>
-                <option value="3">Part 6</option>
+              <select
+                name="part"
+                id="part"
+                onChange={(e) => setInstrument(e.target.value)}
+              >
+                {instruments &&
+                  instruments.map((i, idx) => (
+                    <option key={idx} value={i}>
+                      {i}
+                    </option>
+                  ))}
               </select>
 
               <Navbar.Text>

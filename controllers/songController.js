@@ -1,21 +1,19 @@
 import Song from "../models/Song";
 //Route: /collectives/[collectiveId]/songs - POST, GET
 
-async function getSongs(req) {
-  const { collectiveId } = req.query;
+async function getSongs(collectiveId) {
   const collectiveSongs = await Song.find(
     {
       collectiveId,
     },
     "id title"
   );
-  return { collectiveSongs };
+  return JSON.stringify({ collectiveSongs });
 }
 
-async function getSong(req) {
-  const { id } = req.query;
-  const song = await Song.findById(id);
-  return song;
+async function getSong(songId) {
+  const song = await Song.findById(songId);
+  return JSON.stringify(song);
 }
 
 async function postSong(req) {

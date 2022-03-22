@@ -1,8 +1,8 @@
 import nc from "next-connect";
 import { connectToDB } from "../../../../middleware/connectToDB";
 import {
-  getInstruments,
   postInstruments,
+  getInstrumentsJson,
 } from "../../../../controllers/collectiveController";
 
 const handler = nc({
@@ -18,7 +18,7 @@ const handler = nc({
     await connectToDB(req, res, next);
   })
   .get(async (req, res) => {
-    const result = await getInstruments(req);
+    const result = await getInstrumentsJson(req.query.collectiveId);
     res.send(result);
   })
   .post(async (req, res) => {
