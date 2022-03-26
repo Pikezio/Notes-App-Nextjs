@@ -10,7 +10,6 @@ const CollectiveSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    songs: [String],
     members: [
       {
         userId: {
@@ -21,10 +20,10 @@ const CollectiveSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
-        confirmed: {
-          type: Boolean,
+        status: {
+          type: String,
           required: true,
-          default: false,
+          default: "Requested",
         },
       },
     ],

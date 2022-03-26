@@ -1,32 +1,28 @@
 import { Form, ListGroup, Row, Col } from "react-bootstrap";
 
-// List of instruments.
-// TODO: #1 get from database later
-export const instrumentList = ["Flute", "Saxophone", "Trumpet", "Trombone"];
-
-// Constructs a drowndown menu.
-export const dropDownList = (
-  <>
-    <option>Pasirinkite instrumentą</option>
-    {instrumentList.map((i, idx) => (
-      <option key={idx} value={i}>
-        {i}
-      </option>
-    ))}
-  </>
-);
-
 export default function FileUpload({
   handleFileChange,
   handleDropDownChange,
   parts,
+  instrumentList,
 }) {
+  const dropDownList = (
+    <>
+      <option>Pasirinkite instrumentą</option>
+      {instrumentList &&
+        instrumentList.map((i, idx) => (
+          <option key={idx} value={i}>
+            {i}
+          </option>
+        ))}
+    </>
+  );
+
   // Constructs a list of files with dropdown menus.
   const selectedParts = parts
     ? parts.map((part, partId) => (
         <ListGroup.Item key={partId}>
           <Row>
-            {console.log(part)}
             <Col>{part.file.name}</Col>
             <Col md="auto">
               <Form.Select onChange={(e) => handleDropDownChange(e, partId)}>

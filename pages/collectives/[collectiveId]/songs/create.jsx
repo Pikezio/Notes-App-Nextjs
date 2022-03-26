@@ -1,8 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import FileUpload from "../../../components/files/FileUpload";
 import { useRouter } from "next/router";
+import { server } from "../../../../util/urlConfig";
 import { useSession, getSession } from "next-auth/react";
+import axios from "axios";
 
 export default function CreateSong({ owner }) {
   const router = useRouter();
@@ -14,8 +16,21 @@ export default function CreateSong({ owner }) {
   const arrangerRef = useRef();
 
   const [parts, setParts] = useState();
+  const [instruments, setInstruments] = useState();
 
   const url = `/api/collectives/${collectiveId}/songs`;
+
+  useEffect(() => {
+    if (collectiveId) {
+      const getInstruments = async () => {
+        const response = await axios.get(
+          `${server}/api/collectives/${collectiveId}/instruments`
+        );
+        setInstruments(["---", ...response.data.instruments]);
+      };
+      getInstruments();
+    }
+  }, [collectiveId]);
 
   const toBase64 = (file) =>
     new Promise((resolve, reject) => {
@@ -114,6 +129,7 @@ export default function CreateSong({ owner }) {
           handleDropDownChange={handleDropDownChange}
           handleFileChange={handleFileChange}
           parts={parts}
+          instrumentList={instruments}
         />
         <Button className="mt-3" onClick={constructData}>
           Įrašyti

@@ -5,7 +5,9 @@ async function getCollectives(userId) {
   const ownedCollectives = await Collective.find({ owner: userId }, "id title");
   const memberInCollectives = await Collective.find(
     {
+      owner: { $ne: userId },
       "members.userId": userId,
+      "members.status": "Accepted",
     },
     "id title"
   );
@@ -14,9 +16,71 @@ async function getCollectives(userId) {
   });
 }
 
+async function getAllCollectives(userId) {
+  const unjoinedCollectives = await Collective.find({
+    owner: { $ne: userId },
+    "members.userId": { $ne: userId },
+  }).select("id title");
+
+  const joinedCollectives = await Collective.find(
+    {
+      owner: { $ne: userId },
+      "members.userId": userId,
+      "members.status": "Requested",
+    },
+    { _id: 1, title: 1, "members.status": 1 }
+  );
+  return JSON.stringify({ unjoinedCollectives, joinedCollectives });
+}
+
+async function joinCollective(req) {
+  const { collectiveId } = req.query;
+  const { userId, name } = req.body;
+  const collective = await Collective.findById(collectiveId);
+  collective.members.push({
+    userId,
+    name,
+    status: "Requested",
+  });
+  collective.save();
+  return collective;
+}
+
+async function modifyUserRequest(req) {
+  const { action, userId, collectiveId } = req.body;
+  switch (action) {
+    case "accept":
+      const member = await Collective.findOne(
+        {
+          _id: collectiveId,
+          "members.userId": userId,
+          "members.status": "Requested",
+        },
+        {
+          "members.id": 1,
+        }
+      );
+      console.log(member);
+      return member;
+    case "decline":
+      console.log("declinings" + userId);
+      break;
+  }
+}
+
+async function getCollectiveMembers(collectiveId) {
+  const members = await Collective.findById(collectiveId).select("members");
+  return JSON.stringify(members);
+}
+
 async function getCollective(id) {
   const collective = await Collective.findById(id);
   return collective;
+}
+
+async function getCollectiveOwner(id) {
+  const collective = await Collective.findById(id);
+  return collective.owner;
 }
 
 async function postCollective(req) {
@@ -52,4 +116,9 @@ module.exports = {
   getInstruments,
   postInstruments,
   getInstrumentsJson,
+  getCollectiveOwner,
+  getAllCollectives,
+  joinCollective,
+  getCollectiveMembers,
+  modifyUserRequest,
 };

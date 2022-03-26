@@ -1,8 +1,8 @@
 import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useSetRecoilState } from "recoil";
-import { instrumentState, instrumentListState } from "../../atoms";
+import { useRecoilState } from "recoil";
+import { instrumentState } from "../../atoms";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { server } from "../../util/urlConfig";
@@ -11,17 +11,16 @@ import { useRouter } from "next/router";
 export default function CustomNavbar() {
   const { data: session } = useSession();
   const router = useRouter();
-  const { collectiveId } = router.query;
+  const { collectiveId, songId } = router.query;
   const { pathname } = router;
   const [instruments, setInstruments] = useState([]);
-  const setInstrument = useSetRecoilState(instrumentState);
-  // const [instrumentList, setInstrumentList] =
-  //   useRecoilState(instrumentListState);
+  const [selectedInstrument, setSelectedInstrument] =
+    useRecoilState(instrumentState);
 
   // When pathname changes
-  useEffect(() => {
-    console.log(pathname);
-  }, [pathname]);
+  // useEffect(() => {
+  //   console.log(pathname);
+  // }, [pathname]);
 
   // When collectiveId changes
   useEffect(() => {
@@ -30,11 +29,17 @@ export default function CustomNavbar() {
         const response = await axios.get(
           `${server}/api/collectives/${collectiveId}/instruments`
         );
-        setInstruments(response.data.instruments);
+        setInstruments(["---", ...response.data.instruments]);
+        setSelectedInstrument(localStorage.getItem(collectiveId));
       };
       getInstruments();
     }
-  }, [collectiveId]);
+  }, [collectiveId, setSelectedInstrument]);
+
+  const onInstrumentChange = (e) => {
+    setSelectedInstrument(e.target.value);
+    localStorage.setItem(collectiveId, e.target.value);
+  };
 
   return (
     <Navbar>
@@ -50,24 +55,23 @@ export default function CustomNavbar() {
                 </Link>
               </Nav>
 
-              <Nav className="me-auto">
-                <Link href={`/songs`} passHref>
-                  <Nav.Link>Kūriniai</Nav.Link>
-                </Link>
-              </Nav>
-
-              <select
-                name="part"
-                id="part"
-                onChange={(e) => setInstrument(e.target.value)}
-              >
-                {instruments &&
-                  instruments.map((i, idx) => (
-                    <option key={idx} value={i}>
-                      {i}
-                    </option>
-                  ))}
-              </select>
+              {(collectiveId || songId) && (
+                <select
+                  name="part"
+                  id="part"
+                  onChange={onInstrumentChange}
+                  value={
+                    selectedInstrument ? selectedInstrument : "Nepasirinktas"
+                  }
+                >
+                  {instruments &&
+                    instruments.map((i, idx) => (
+                      <option key={idx} value={i}>
+                        {i}
+                      </option>
+                    ))}
+                </select>
+              )}
 
               <Navbar.Text>
                 Prisijungta: {session.user.email} {session.id}
