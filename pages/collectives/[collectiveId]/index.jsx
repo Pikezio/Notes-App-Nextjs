@@ -12,23 +12,26 @@ import axios from "axios";
 import { server } from "../../../util/urlConfig";
 
 function Collective({ songs, owner, requestedUsers }) {
-  const { collectiveId } = useRouter().query;
+  const router = useRouter();
+  const { collectiveId } = router.query;
   const instrument = useRecoilValue(instrumentState);
 
-  const acceptUser = (userId) => {
-    axios.post(`${server}/api/collectives/${collectiveId}/user`, {
+  const acceptUser = async (_id) => {
+    await axios.post(`${server}/api/collectives/${collectiveId}/user`, {
+      _id,
       action: "accept",
-      userId,
       collectiveId,
     });
+    router.replace(router.asPath);
   };
 
-  const declineUser = (userId) => {
-    axios.post(`${server}/api/collectives/${collectiveId}/user`, {
+  const declineUser = async (_id) => {
+    await axios.post(`${server}/api/collectives/${collectiveId}/user`, {
+      _id,
       action: "decline",
-      userId,
       collectiveId,
     });
+    router.replace(router.asPath);
   };
 
   return (
@@ -63,11 +66,16 @@ function Collective({ songs, owner, requestedUsers }) {
           {requestedUsers &&
             requestedUsers.map((user) => (
               <li key={user._id}>
+                {user._id}
                 {user.name} <strong>{user.status}</strong>
-                <button onClick={() => acceptUser(user.userId)}>Accept</button>
-                <button onClick={() => declineUser(user.userId)}>
-                  Decline
-                </button>
+                {user.status === "Requested" && (
+                  <>
+                    <button onClick={() => acceptUser(user._id)}>Accept</button>
+                    <button onClick={() => declineUser(user._id)}>
+                      Decline
+                    </button>
+                  </>
+                )}
               </li>
             ))}
         </>

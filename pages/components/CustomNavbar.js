@@ -55,6 +55,12 @@ export default function CustomNavbar() {
                 </Link>
               </Nav>
 
+              <Nav className="me-auto">
+                <Link href={`/collectives/all`} passHref>
+                  <Nav.Link>Visi kolektyvai</Nav.Link>
+                </Link>
+              </Nav>
+
               {(collectiveId || songId) && (
                 <select
                   name="part"

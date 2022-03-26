@@ -47,24 +47,34 @@ async function joinCollective(req) {
 }
 
 async function modifyUserRequest(req) {
-  const { action, userId, collectiveId } = req.body;
+  const { action, _id, collectiveId } = req.body;
   switch (action) {
     case "accept":
-      const member = await Collective.findOne(
+      const member1 = await Collective.updateOne(
         {
           _id: collectiveId,
-          "members.userId": userId,
-          "members.status": "Requested",
+          "members._id": _id,
         },
         {
-          "members.id": 1,
+          $set: {
+            "members.$.status": "Accepted",
+          },
         }
       );
-      console.log(member);
-      return member;
+      return member1;
     case "decline":
-      console.log("declinings" + userId);
-      break;
+      const member2 = await Collective.updateOne(
+        {
+          _id: collectiveId,
+          "members._id": _id,
+        },
+        {
+          $set: {
+            "members.$.status": "Declined",
+          },
+        }
+      );
+      return member2;
   }
 }
 
