@@ -8,7 +8,7 @@ async function getSongs(collectiveId) {
     },
     "id title"
   );
-  return JSON.stringify({ collectiveSongs });
+  return JSON.stringify(collectiveSongs);
 }
 
 async function getPartOfSong(req) {

@@ -3,10 +3,12 @@ import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import FileUpload from "../../../components/files/FileUpload";
 import { useRouter } from "next/router";
 import { server } from "../../../../util/urlConfig";
-import { useSession, getSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import axios from "axios";
 
 export default function CreateSong({ owner }) {
+  const session = useSession();
+
   const router = useRouter();
   const { collectiveId } = router.query;
 

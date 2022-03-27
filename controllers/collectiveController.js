@@ -83,6 +83,19 @@ async function getCollectiveMembers(collectiveId) {
   return JSON.stringify(members);
 }
 
+async function getCollectiveMember(collectiveId, memberUserId) {
+  const member = await Collective.findOne(
+    {
+      _id: collectiveId,
+      "members.userId": memberUserId,
+    },
+    {
+      "members.$": 1,
+    }
+  );
+  return member;
+}
+
 async function getCollective(id) {
   const collective = await Collective.findById(id);
   return collective;
@@ -130,5 +143,6 @@ module.exports = {
   getAllCollectives,
   joinCollective,
   getCollectiveMembers,
+  getCollectiveMember,
   modifyUserRequest,
 };
