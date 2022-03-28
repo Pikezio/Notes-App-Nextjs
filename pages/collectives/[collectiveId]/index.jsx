@@ -96,18 +96,17 @@ export async function getServerSideProps(context) {
   let member = false;
   let data = {};
   const session = await getSession(context);
-  const collectiveId = context.query.collectiveId;
-  const collectiveOwner = await getCollectiveOwner(collectiveId);
-
-  if (!session)
+  if (!session) {
     return {
-      props: {
-        data: {
-          owner: false,
-          member: false,
-        },
+      redirect: {
+        destination: "/",
+        permanent: false,
       },
     };
+  }
+
+  const collectiveId = context.query.collectiveId;
+  const collectiveOwner = await getCollectiveOwner(collectiveId);
 
   if (session.userId === collectiveOwner) owner = true;
 

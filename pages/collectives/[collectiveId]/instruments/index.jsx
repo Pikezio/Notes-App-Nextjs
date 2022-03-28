@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Draggable } from "react-beautiful-dnd";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { Button, Container, Form, ListGroup } from "react-bootstrap";
@@ -6,6 +6,7 @@ import { resetServerContext } from "react-beautiful-dnd";
 import { server } from "../../../../util/urlConfig";
 import { useRouter } from "next/router";
 import { getInstruments } from "../../../../controllers/collectiveController";
+import { getSession } from "next-auth/react";
 
 resetServerContext();
 
@@ -121,6 +122,16 @@ export default function EditInstrumentList({ instruments }) {
 }
 
 export async function getServerSideProps(context) {
+  const session = await getSession(context);
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
   const response = await getInstruments(context.query.collectiveId);
   const instruments = await JSON.parse(response);
 

@@ -4,8 +4,10 @@ import {
 } from "../../../../controllers/collectiveController";
 import globalHandler from "../../../../middleware/globalHandler";
 import { isUserCollectiveOwner } from "../../../../middleware/isUserCollectiveOwner";
+import { isUserCollectiveMember } from "../../../../middleware/isUserCollectiveMember";
 
 const handler = globalHandler()
+  .use(isUserCollectiveMember)
   .get(async (req, res) => {
     const result = await getInstrumentsJson(req.query.collectiveId);
     res.send(result);

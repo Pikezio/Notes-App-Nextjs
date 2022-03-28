@@ -1,15 +1,22 @@
 import "../styles/globals.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Layout from "./components/layout";
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider, signIn, useSession } from "next-auth/react";
 import { RecoilRoot } from "recoil";
+import React from "react";
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
     <SessionProvider session={session}>
       <RecoilRoot>
         <Layout>
-          <Component {...pageProps} />
+          {Component.auth ? (
+            <Auth>
+              <Component {...pageProps} />
+            </Auth>
+          ) : (
+            <Component {...pageProps} />
+          )}
         </Layout>
       </RecoilRoot>
     </SessionProvider>
@@ -17,3 +24,18 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
 }
 
 export default MyApp;
+
+function Auth({ children }) {
+  const { data: session, status } = useSession();
+  const isUser = !!session?.user;
+  React.useEffect(() => {
+    if (status === "loading") return;
+    if (!isUser) signIn();
+  }, [isUser, status]);
+
+  if (isUser) {
+    return children;
+  }
+
+  return <div>Loading...</div>;
+}

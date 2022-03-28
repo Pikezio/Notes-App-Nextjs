@@ -3,7 +3,7 @@ import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import { useRouter } from "next/router";
 import axios from "axios";
 
-export default function CreateSong() {
+export default function CreateCollective() {
   const router = useRouter();
 
   // Form field references
@@ -15,24 +15,10 @@ export default function CreateSong() {
       title: titleRef.current.value,
     };
 
-    try {
-      const res = await fetch("/api/collectives", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      // Throw error with status code in case Fetch API req failed
-      if (!res.ok) {
-        throw new Error(res.status);
-      }
-
-      router.push("/");
-    } catch (error) {
-      console.log(error);
-    }
+    axios
+      .post("/api/collectives", data)
+      .then(router.push("/"))
+      .catch((err) => console.log(err));
   };
 
   return (
@@ -54,3 +40,5 @@ export default function CreateSong() {
     </Container>
   );
 }
+
+CreateCollective.auth = true;

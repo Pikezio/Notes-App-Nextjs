@@ -13,13 +13,15 @@ export default function SongDetails() {
 
   useEffect(() => {
     const getPart = async () => {
-      const response = await axios.get(
-        `${server}/api/songs/${songId}?part=${instrument}`
-      );
-      setPart(response.data);
+      if (router.isReady) {
+        const response = await axios.get(
+          `${server}/api/songs/${songId}?part=${instrument}`
+        );
+        setPart(response.data);
+      }
     };
     getPart();
-  }, [instrument, songId]);
+  }, [instrument, songId, router.isReady]);
 
   return (
     <div>
@@ -36,3 +38,5 @@ export default function SongDetails() {
     </div>
   );
 }
+
+SongDetails.auth = true;

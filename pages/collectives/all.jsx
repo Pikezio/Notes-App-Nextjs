@@ -41,6 +41,15 @@ function ListOfAllCollectives({ collectives }) {
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
   const response = await getAllCollectives(session.userId);
   const data = JSON.parse(response);
 

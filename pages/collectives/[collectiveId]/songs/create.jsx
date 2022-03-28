@@ -140,3 +140,5 @@ export default function CreateSong({ owner }) {
     </Container>
   );
 }
+
+CreateSong.auth = true;

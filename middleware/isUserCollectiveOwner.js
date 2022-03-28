@@ -6,6 +6,7 @@ export async function isUserCollectiveOwner(req, res, next) {
   const ownerId = await getCollectiveOwner(collectiveId);
   if (ownerId !== req.userId) {
     res.status(403).json({ error: "This user is not the owner." });
+    return;
   }
   next();
 }

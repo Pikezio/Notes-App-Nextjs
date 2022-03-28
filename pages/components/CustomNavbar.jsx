@@ -12,29 +12,24 @@ export default function CustomNavbar() {
   const { data: session } = useSession();
   const router = useRouter();
   const { collectiveId, songId } = router.query;
-  const { pathname } = router;
   const [instruments, setInstruments] = useState([]);
   const [selectedInstrument, setSelectedInstrument] =
     useRecoilState(instrumentState);
 
-  // When pathname changes
-  // useEffect(() => {
-  //   console.log(pathname);
-  // }, [pathname]);
-
   // When collectiveId changes
   useEffect(() => {
-    if (collectiveId) {
-      const getInstruments = async () => {
+    const getInstruments = async () => {
+      if (router.isReady && collectiveId) {
         const response = await axios.get(
           `${server}/api/collectives/${collectiveId}/instruments`
         );
+
         setInstruments(["---", ...response.data.instruments]);
         setSelectedInstrument(localStorage.getItem(collectiveId));
-      };
-      getInstruments();
-    }
-  }, [collectiveId, setSelectedInstrument]);
+      }
+    };
+    getInstruments();
+  }, [router.isReady, collectiveId, setSelectedInstrument]);
 
   const onInstrumentChange = (e) => {
     setSelectedInstrument(e.target.value);
@@ -50,14 +45,20 @@ export default function CustomNavbar() {
           {session ? (
             <>
               <Nav className="me-auto">
-                <Link href={`/collectives`} passHref>
-                  <Nav.Link>Kolektyvai</Nav.Link>
+                <Link href={`/`} passHref>
+                  <Nav.Link>Pagrindinis</Nav.Link>
                 </Link>
               </Nav>
 
               <Nav className="me-auto">
                 <Link href={`/collectives/all`} passHref>
                   <Nav.Link>Visi kolektyvai</Nav.Link>
+                </Link>
+              </Nav>
+
+              <Nav className="me-auto">
+                <Link href={`/collectives/create`} passHref>
+                  <Nav.Link>Sukurti kolektyvą</Nav.Link>
                 </Link>
               </Nav>
 

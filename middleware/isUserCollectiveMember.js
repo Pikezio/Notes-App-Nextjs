@@ -1,12 +1,23 @@
 import { getCollectiveMember } from "../controllers/collectiveController";
+import { getCollectiveOwner } from "../controllers/collectiveController";
 
 // collectiveId must be in URL and userId must be in request
 async function isUserCollectiveMember(req, res, next) {
   const { collectiveId } = req.query;
 
-  //   if (member) {
-  //     res.status(403).json({ error: "This user is not the owner." });
-  //   }
+  const ownerId = await getCollectiveOwner(collectiveId);
+  if (ownerId === req.userId) {
+    console.log("im owner");
+    next();
+    return;
+  }
+
+  const member = await isMember(collectiveId, req.userId);
+  if (!member) {
+    res.status(403).json({ error: "User is not a member" });
+    return;
+  }
+  console.log("im member");
   next();
 }
 

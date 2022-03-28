@@ -1,7 +1,4 @@
-import React from "react";
 import Link from "next/link";
-import { getSession } from "next-auth/react";
-import { getCollectives } from "../../controllers/collectiveController";
 
 function ListOfCollectives({ owned, member }) {
   return (
@@ -28,19 +25,6 @@ function ListOfCollectives({ owned, member }) {
       </div>
     </div>
   );
-}
-
-export async function getServerSideProps(context) {
-  const session = await getSession(context);
-  const response = await getCollectives(session.userId);
-  const data = JSON.parse(response).data;
-
-  return {
-    props: {
-      owned: data.owned,
-      member: data.member,
-    },
-  };
 }
 
 export default ListOfCollectives;
