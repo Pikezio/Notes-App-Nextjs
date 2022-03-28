@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { server } from "../../../../util/urlConfig";
 import { useSession } from "next-auth/react";
 import axios from "axios";
+import { toBase64 } from "../../../../util/toBase64";
 
 export default function CreateSong({ owner }) {
   const session = useSession();
@@ -33,14 +34,6 @@ export default function CreateSong({ owner }) {
       getInstruments();
     }
   }, [collectiveId]);
-
-  const toBase64 = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
 
   // Updates state, when files change
   function handleFileChange(e) {

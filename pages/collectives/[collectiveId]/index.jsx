@@ -63,6 +63,11 @@ function Collective({ data }) {
                 <a>Redaguoti instrumentus</a>
               </Link>
             </p>
+            <p>
+              <Link href={`${collectiveId}/edit`}>
+                <a>Redaguoti kolektyvą</a>
+              </Link>
+            </p>
 
             <h1>Kolektyvo nariai</h1>
             {data.requestedUsers &&

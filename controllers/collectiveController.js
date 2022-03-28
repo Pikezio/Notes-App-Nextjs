@@ -1,7 +1,9 @@
 import Collective from "../models/Collective";
+import dbConnect from "../util/dbConnect";
 //Route: /collectives - POST, GET
 
 async function getCollectives(userId) {
+  await dbConnect();
   const ownedCollectives = await Collective.find({ owner: userId }, "id title");
   const memberInCollectives = await Collective.find(
     {
@@ -17,6 +19,7 @@ async function getCollectives(userId) {
 }
 
 async function getAllCollectives(userId) {
+  await dbConnect();
   const unjoinedCollectives = await Collective.find({
     owner: { $ne: userId },
     "members.userId": { $ne: userId },
@@ -84,6 +87,7 @@ async function getCollectiveMembers(collectiveId) {
 }
 
 async function getCollectiveMember(collectiveId, memberUserId) {
+  await dbConnect();
   const member = await Collective.findOne(
     {
       _id: collectiveId,
@@ -97,11 +101,13 @@ async function getCollectiveMember(collectiveId, memberUserId) {
 }
 
 async function getCollective(id) {
+  await dbConnect();
   const collective = await Collective.findById(id);
-  return collective;
+  return JSON.stringify(collective);
 }
 
 async function getCollectiveOwner(id) {
+  await dbConnect();
   const collective = await Collective.findById(id);
   return collective.owner;
 }
@@ -115,7 +121,28 @@ async function postCollective(req) {
   return createdCollective;
 }
 
+async function updateCollective(req) {
+  const { collectiveId } = req.query;
+  const updated = await Collective.findOneAndUpdate(
+    {
+      _id: collectiveId,
+    },
+
+    req.body
+  );
+  return updated;
+}
+
+async function deleteCollective(req) {
+  const { collectiveId } = req.query;
+  const deleted = await Collective.findOneAndDelete({
+    _id: collectiveId,
+  });
+  return deleted;
+}
+
 async function getInstruments(collectiveId) {
+  await dbConnect();
   const instruments = await Collective.findById(collectiveId, "instruments");
   return JSON.stringify(instruments);
 }
@@ -125,6 +152,7 @@ async function getInstrumentsJson(collectiveId) {
   return instruments;
 }
 async function postInstruments(req) {
+  await dbConnect();
   const { collectiveId } = req.query;
   const instruments = await Collective.findByIdAndUpdate(collectiveId, {
     instruments: req.body,
@@ -135,6 +163,8 @@ async function postInstruments(req) {
 module.exports = {
   getCollectives,
   postCollective,
+  updateCollective,
+  deleteCollective,
   getCollective,
   getInstruments,
   postInstruments,

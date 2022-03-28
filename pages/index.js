@@ -17,6 +17,7 @@ export default function Home({ owned, member }) {
 
 export async function getServerSideProps(context) {
   // Check session and redirect if not logged in.
+
   const session = await getSession(context);
   if (!session) {
     return {

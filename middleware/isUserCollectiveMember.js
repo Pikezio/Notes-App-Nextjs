@@ -7,7 +7,6 @@ async function isUserCollectiveMember(req, res, next) {
 
   const ownerId = await getCollectiveOwner(collectiveId);
   if (ownerId === req.userId) {
-    console.log("im owner");
     next();
     return;
   }
@@ -17,7 +16,6 @@ async function isUserCollectiveMember(req, res, next) {
     res.status(403).json({ error: "User is not a member" });
     return;
   }
-  console.log("im member");
   next();
 }
 
