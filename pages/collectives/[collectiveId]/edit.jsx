@@ -39,7 +39,6 @@ const EditCollective = ({ collective, collectiveId }) => {
       };
     }
 
-    console.log(payload);
     axios
       .patch(`${server}/api/collectives/${collectiveId}/`, payload)
       .then(router.replace(router.asPath))

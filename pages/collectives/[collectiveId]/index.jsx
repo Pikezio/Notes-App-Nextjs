@@ -5,12 +5,12 @@ import {
   getCollectiveMembers,
 } from "../../../controllers/collectiveController";
 import { useRecoilValue } from "recoil";
-import { instrumentState } from "../../../atoms";
 import { getSession } from "next-auth/react";
 import { getSongs } from "../../../controllers/songController";
 import axios from "axios";
-import { server } from "../../../util/urlConfig";
 import { isMember } from "../../../middleware/isUserCollectiveMember";
+import {server} from "../../../util/urlConfig";
+import {instrumentState} from "../../../atoms";
 
 function Collective({ data }) {
   const router = useRouter();
@@ -49,6 +49,7 @@ function Collective({ data }) {
                 <Link href={`/songs/${s._id}?part=${instrument}`}>
                   <a>{s.title}</a>
                 </Link>
+                <Link href={`/songs/${s._id}/edit`}> Edit</Link>
               </li>
             ))}
         </ul>

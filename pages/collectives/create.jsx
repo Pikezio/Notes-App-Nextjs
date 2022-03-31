@@ -17,7 +17,7 @@ export default function CreateCollective() {
 
     axios
       .post("/api/collectives", data)
-      .then(router.push("/"))
+      .then(router.replace("/"))
       .catch((err) => console.log(err));
   };
 

@@ -32,9 +32,23 @@ async function postSong(req) {
   return song.id;
 }
 
+async function deleteSong(req) {
+  const { songId } = req.query;
+  const song = await Song.findByIdAndDelete(songId);
+  return song;
+}
+
+async function updateSong(req) {
+  const { songId } = req.query;
+  const song = await Song.findByIdAndUpdate(songId, req.body);
+  return song;
+}
+
 module.exports = {
+  getSong,
   postSong,
   getSongs,
-  getSong,
   getPartOfSong,
+  deleteSong,
+  updateSong,
 };
