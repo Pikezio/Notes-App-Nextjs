@@ -1,14 +1,17 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {getSession} from "next-auth/react";
 import {getSong} from "../../../controllers/songController";
 import {getInstruments} from "../../../controllers/collectiveController";
 import EditSong from "../../components/Song/EditSong";
 import EditPart from "../../components/Song/EditPart";
+import AddPart from "../../components/Song/AddPart";
 
 function Edit({song, instrumentList}) {
 
-    const optionList = instrumentList && instrumentList.map((instrument, idx) => (
-        <option key={idx} value={instrument}>{instrument}</option>))
+    const dashes = <option key={0} value="---">---</option>
+    const list = instrumentList && instrumentList.map((instrument, idx) => (
+        <option key={++idx} value={instrument}>{instrument}</option>))
+    const optionList = [dashes, ...list];
 
     return (
         <div>
@@ -17,9 +20,10 @@ function Edit({song, instrumentList}) {
             <h1>Partijos</h1>
             <ul>
                 {song.parts && song.parts.map(part =>
-                    <EditPart key={part._id} optionList={optionList} part={part}/>
+                    <EditPart key={part._id} optionList={optionList} part={part} songId={song._id}/>
                 )}
             </ul>
+            <AddPart optionList={optionList} songId={song._id}/>
         </div>
     );
 }

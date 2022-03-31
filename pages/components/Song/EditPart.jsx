@@ -1,7 +1,10 @@
 import React, {useState} from 'react';
 import {toBase64} from "../../../util/toBase64";
+import axios from "axios";
+import {server} from "../../../util/urlConfig";
+import {useRouter} from "next/router";
 
-function EditPart({optionList, part}) {
+function EditPart({optionList, part, songId}) {
     const [newPartData, setNewPartData] = useState({
         instrument: part.instrument,
         file: null
@@ -10,14 +13,13 @@ function EditPart({optionList, part}) {
     const showSaveButton =
         newPartData.instrument !== part.instrument || newPartData.file !== null
 
-
+    const router = useRouter()
     function deletePart(partId) {
-        if (confirm(`Ar tikrai norite pakeisti šį partijos failą?`)) {
-
-            // axios
-            //     .delete(`${server}/api/songs/${songId}/`)
-            //     .then(router.replace("/"))
-            //     .catch((err) => console.log(err));
+        if (confirm(`Ar tikrai norite ištrinti šią partiją?`)) {
+            axios
+                .delete(`${server}/api/songs/${songId}/part?partId=${partId}`)
+                .then(router.replace(router.asPath))
+                .catch((err) => console.log(err));
         }
     }
 
@@ -27,7 +29,10 @@ function EditPart({optionList, part}) {
     }
 
     function submitChanges(partId) {
-        
+        axios
+            .patch(`${server}/api/songs/${songId}/part?partId=${partId}`, newPartData)
+            .then(router.replace(router.asPath))
+            .catch((err) => console.log(err));
     }
 
     // TODO: preview file somehow

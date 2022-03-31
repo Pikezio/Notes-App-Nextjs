@@ -1,7 +1,7 @@
-import {deleteSong, getPartOfSong, updateSong} from "../../../controllers/songController";
-import globalHandler from "../../../middleware/globalHandler";
-
 // TODO: implement security here
+import globalHandler from "../../../../middleware/globalHandler";
+import {deleteSong, updateSong, getPartOfSong} from "../../../../controllers/songController";
+
 const handler = globalHandler()
     .get(async (req, res) => {
         const result = await getPartOfSong(req);
