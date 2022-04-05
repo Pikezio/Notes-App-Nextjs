@@ -32,4 +32,6 @@ const SongSchema = new mongoose.Schema({
   },
 });
 
+SongSchema.index({title: "text", composer: "text", arranger: "text" })
+
 export default mongoose.models.Song || mongoose.model("Song", SongSchema);

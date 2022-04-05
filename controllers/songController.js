@@ -1,35 +1,73 @@
 import Song from "../models/Song";
-import {forEach} from "react-bootstrap/ElementChildren";
+import {getCollectives} from "./collectiveController";
 
 //Route: /collectives/[collectiveId]/songs - POST, GET
 
-async function getSongs(collectiveId) {
-    const collectiveSongs = await Song.find(
+async function getAllSongs(req) {
+    // Get all collectives that the current user is part of
+    const userCollectives = JSON.parse(await getCollectives(req.userId)).data
+    const allCollectives = userCollectives.owned.concat(userCollectives.member)
+
+    const {search} = req.query
+
+    // Get songs for each collective
+    const songs = await Promise.all(allCollectives.map(async col => ([col.title, ...JSON.parse(await searchSongs(col._id, search))])))
+    return songs;
+}
+
+// Search songs
+async function searchSongs(collectiveId, search) {
+    if (search === undefined) return {}
+    const res = await Song.aggregate([{
+        "$search": {
+            "index": "default",
+            "text": {
+                "query": search,
+                "path": {
+                    "wildcard": "*"
+                },
+                "fuzzy": {
+                    "maxEdits": 2
+                }
+            }
+        }
+    },
+        {"$limit": 6},
         {
-            collectiveId,
-        },
-        "id title"
-    );
-    return JSON.stringify(collectiveSongs);
+            "$match": {
+                "collectiveId": collectiveId
+            }
+        }, {
+            "$project": {
+                "title": 1
+            }
+        }])
+    return JSON.stringify(res);
 }
 
 async function getPartOfSong(req) {
     const {songId, part} = req.query;
-    const songWithPart = await Song.findOne(
-        {_id: songId, "parts.instrument": part},
-        {_id: 1, title: 1, composer: 1, arranger: 1, "parts.$": 1}
-    );
+    const songWithPart = await Song.findOne({_id: songId, "parts.instrument": part}, {
+        _id: 1,
+        title: 1,
+        composer: 1,
+        arranger: 1,
+        "parts.$": 1
+    });
     return songWithPart;
 }
 
 async function getSong(songId) {
-    const song = await Song.findById(songId).select(
-        {
-            _id: 1, title: 1, composer: 1, arranger: 1, collectiveId: 1,
-            "parts._id": 1,
-            "parts.instrument": 1,
-            "parts.filename": 1
-        });
+    const song = await Song.findById(songId).select({
+        _id: 1,
+        title: 1,
+        composer: 1,
+        arranger: 1,
+        collectiveId: 1,
+        "parts._id": 1,
+        "parts.instrument": 1,
+        "parts.filename": 1
+    });
     return JSON.stringify(song);
 }
 
@@ -52,50 +90,6 @@ async function updateSong(req) {
     return song;
 }
 
-async function updatePart(req) {
-    const {songId, partId} = req.query
-    let setObject = {
-        "$set": {
-            "parts.$.instrument": req.body.instrument
-        }
-    }
-
-    if (req.body.file !== null) {
-        setObject = {
-            "$set": {
-                "parts.$.instrument": req.body.instrument,
-                "parts.$.file": req.body.file,
-            }
-        }
-    }
-
-    const song = await Song.updateOne({
-            _id: songId,
-            "parts._id": partId
-        },
-        setObject
-    );
-    return setObject;
-}
-
-async function deletePart(req) {
-    const {songId, partId} = req.query
-    const song = await Song.findById(songId);
-    song.parts.pull({_id: partId})
-    await song.save();
-    return {};
-}
-
-async function addPart(req) {
-    const {songId} = req.query
-    const song = await Song.findById(songId);
-    req.body.map(part => {
-        song.parts.push(part)
-    })
-    await song.save();
-    return {};
-}
-
 async function getSongCollectiveId(req) {
     const {songId} = req.query
     const songCollectiveId = await Song.findById(songId).select("collectiveId");
@@ -105,8 +99,7 @@ async function getSongCollectiveId(req) {
 async function getSongNamesByPart(req) {
     const {collectiveId, instrument} = req.query
     const songNames = await Song.find({
-        collectiveId,
-        "parts.instrument": instrument
+        collectiveId, "parts.instrument": instrument
     }, {
         title: 1
     })
@@ -115,14 +108,12 @@ async function getSongNamesByPart(req) {
 
 module.exports = {
     getSong,
+    getAllSongs,
     postSong,
-    getSongs,
+    getSongs: searchSongs,
     getPartOfSong,
     deleteSong,
     updateSong,
-    updatePart,
-    deletePart,
-    addPart,
     getSongCollectiveId,
     getSongNamesByPart,
 };

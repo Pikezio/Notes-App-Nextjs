@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {useRecoilState} from "recoil";
 import axios from "axios";
 import { useRouter } from "next/router";
-import {instrumentState} from "../../../atoms";
 import {server} from "../../../util/urlConfig";
 
 export default function SongDetails() {

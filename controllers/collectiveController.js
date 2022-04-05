@@ -1,7 +1,9 @@
 import Collective from "../models/Collective";
 import dbConnect from "../util/dbConnect";
+
 //Route: /collectives - POST, GET
 
+// Gets all owned and joined collectives for a user
 async function getCollectives(userId) {
   await dbConnect();
   const ownedCollectives = await Collective.find({ owner: userId }, "id title");
@@ -18,6 +20,7 @@ async function getCollectives(userId) {
   });
 }
 
+// Gets all collectives that are not joined by the user
 async function getAllCollectives(userId) {
   await dbConnect();
   const unjoinedCollectives = await Collective.find({
@@ -36,56 +39,13 @@ async function getAllCollectives(userId) {
   return JSON.stringify({ unjoinedCollectives, joinedCollectives });
 }
 
-async function joinCollective(req) {
-  const { collectiveId } = req.query;
-  const { userId, name } = req.body;
-  const collective = await Collective.findById(collectiveId);
-  collective.members.push({
-    userId,
-    name,
-    status: "Requested",
-  });
-  collective.save();
-  return collective;
-}
-
-async function modifyUserRequest(req) {
-  const { action, _id, collectiveId } = req.body;
-  switch (action) {
-    case "accept":
-      const member1 = await Collective.updateOne(
-        {
-          _id: collectiveId,
-          "members._id": _id,
-        },
-        {
-          $set: {
-            "members.$.status": "Accepted",
-          },
-        }
-      );
-      return member1;
-    case "decline":
-      const member2 = await Collective.updateOne(
-        {
-          _id: collectiveId,
-          "members._id": _id,
-        },
-        {
-          $set: {
-            "members.$.status": "Declined",
-          },
-        }
-      );
-      return member2;
-  }
-}
-
+// Gets all members for a specific collectiveId
 async function getCollectiveMembers(collectiveId) {
   const members = await Collective.findById(collectiveId).select("members");
   return JSON.stringify(members);
 }
 
+// Get specific collective member by ID
 async function getCollectiveMember(collectiveId, memberUserId) {
   await dbConnect();
   const member = await Collective.findOne(
@@ -106,6 +66,7 @@ async function getCollective(id) {
   return JSON.stringify(collective);
 }
 
+// Gets the owner of collective
 async function getCollectiveOwner(id) {
   await dbConnect();
   const collective = await Collective.findById(id);
@@ -149,8 +110,6 @@ module.exports = {
   getCollective,
   getCollectiveOwner,
   getAllCollectives,
-  joinCollective,
   getCollectiveMembers,
   getCollectiveMember,
-  modifyUserRequest,
 };

@@ -5,7 +5,6 @@ import {
 } from "../../../controllers/collectiveController";
 import {useRecoilState} from "recoil";
 import {getSession} from "next-auth/react";
-import {getSongs} from "../../../controllers/songController";
 import axios from "axios";
 import {isMember} from "../../../middleware/isUserCollectiveMember";
 import {server} from "../../../util/urlConfig";
@@ -140,19 +139,19 @@ export async function getServerSideProps(context) {
     }
 
     if (owner) {
-        const songs = JSON.parse(await getSongs(collectiveId));
+        //const songs = JSON.parse(await getSongs(collectiveId));
         const requestedUsers = await JSON.parse(await getCollectiveMembers(collectiveId)).members;
         data = {
-            owner: true, member: false, songs, requestedUsers,
+            owner: true, member: false, requestedUsers,
         };
     }
 
     // TODO: owner view for seeing all songs, probably lazy loading
     if (!owner && member) {
-        const songs = JSON.parse(await getSongs(collectiveId));
+        //const songs = JSON.parse(await getSongs(collectiveId));
 
         data = {
-            owner: false, member: true, songs,
+            owner: false, member: true,
         };
     }
 
