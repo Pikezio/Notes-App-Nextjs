@@ -3,22 +3,24 @@ import {toBase64} from "../../../util/toBase64";
 import axios from "axios";
 import {server} from "../../../util/urlConfig";
 import {useRouter} from "next/router";
+import Link from "next/link";
 
 function EditPart({optionList, part, songId}) {
     const [newPartData, setNewPartData] = useState({
-        instrument: part.instrument,
-        file: null
+        instrument: part.instrument, file: null
     })
 
-    const showSaveButton =
-        newPartData.instrument !== part.instrument || newPartData.file !== null
+    const showSaveButton = newPartData.instrument !== part.instrument || newPartData.file !== null
 
     const router = useRouter()
+
     function deletePart(partId) {
         if (confirm(`Ar tikrai norite ištrinti šią partiją?`)) {
             axios
                 .delete(`${server}/api/songs/${songId}/part?partId=${partId}`)
-                .then(router.replace(router.asPath))
+                .then(() => {
+                    router.replace(router.asPath)
+                })
                 .catch((err) => console.log(err));
         }
     }
@@ -31,22 +33,24 @@ function EditPart({optionList, part, songId}) {
     function submitChanges(partId) {
         axios
             .patch(`${server}/api/songs/${songId}/part?partId=${partId}`, newPartData)
-            .then(router.replace(router.asPath))
+            .then(() => {
+                console.log("DONE")
+                router.replace(router.asPath)
+            })
             .catch((err) => console.log(err));
     }
 
-    // TODO: preview file somehow
-    return (
-        <div>
+    return (<div>
+            <Link href={`/songs/${songId}?part=${part.instrument}`}>Peržiūrėti</Link>
             <select value={newPartData.instrument}
                     onChange={(e) => setNewPartData({...newPartData, instrument: e.target.value})}>
                 {optionList}
             </select>
+            <>{part.filename}</>
             <input type="file" onChange={(e) => changePartFile(e.target.files[0])}/>
             <button disabled={!showSaveButton} onClick={() => submitChanges(part._id)}>Išsaugoti</button>
             <button onClick={() => deletePart(part._id)}>Ištrinti partiją</button>
-        </div>
-    );
+        </div>);
 }
 
 export default EditPart;

@@ -1,8 +1,11 @@
-// TODO: implement security here
 import globalHandler from "../../../../middleware/globalHandler";
 import {addPart, deletePart, updatePart} from "../../../../controllers/songController";
+import {attachCollectiveId} from "../../../../middleware/attachCollectiveId";
+import {isUserCollectiveOwner} from "../../../../middleware/isUserCollectiveOwner";
 
 const handler = globalHandler()
+    .use(attachCollectiveId)
+    .use(isUserCollectiveOwner)
     .post(async (req, res) => {
         const result = await addPart(req);
         res.send(result);

@@ -1,7 +1,7 @@
 import React from 'react';
 import {getSession} from "next-auth/react";
 import {getSong} from "../../../controllers/songController";
-import {getInstruments} from "../../../controllers/collectiveController";
+import {getInstruments} from "../../../controllers/instrumentController";
 import EditSong from "../../components/Song/EditSong";
 import EditPart from "../../components/Song/EditPart";
 import AddPart from "../../components/Song/AddPart";
@@ -23,7 +23,7 @@ function Edit({song, instrumentList}) {
                     <EditPart key={part._id} optionList={optionList} part={part} songId={song._id}/>
                 )}
             </ul>
-            <AddPart optionList={optionList} songId={song._id}/>
+            <AddPart optionList={optionList}  instrumentList={instrumentList} songId={song._id}/>
         </div>
     );
 }

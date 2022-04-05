@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
+import {useRecoilState} from "recoil";
 import axios from "axios";
 import { useRouter } from "next/router";
 import {instrumentState} from "../../../atoms";
@@ -7,30 +7,30 @@ import {server} from "../../../util/urlConfig";
 
 export default function SongDetails() {
     const router = useRouter();
-    const { songId } = router.query;
-    const instrument = useRecoilValue(instrumentState);
-    const [part, setPart] = useState(null);
+    const { songId, part } = router.query;
+    const [song, setSong] = useState(null);
 
     useEffect(() => {
         const getPart = async () => {
             if (router.isReady) {
                 const response = await axios.get(
-                    `${server}/api/songs/${songId}?part=${instrument}`
+                    `${server}/api/songs/${songId}?part=${part}`
                 );
-                setPart(response.data);
+                setSong(response.data);
             }
         };
         getPart();
-    }, [instrument, songId, router.isReady]);
+    }, [part, songId, router.isReady]);
 
+    // TODO: make a loading bar
     return (
         <div>
-            {part ? (
+            {song ? (
                 <div>
-                    <h1>{part.title}</h1>
-                    <h2>{part.composer}</h2>
-                    <h2>{part.arranger}</h2>
-                    <embed src={part.parts[0].file} width="80%" height="auto" />
+                    <h1>{song.title}</h1>
+                    <h2>{song.composer}</h2>
+                    <h2>{song.arranger}</h2>
+                    <embed src={song.parts[0].file} width="80%" height="auto" />
                 </div>
             ) : (
                 <h1>Nėra tokios partijos...</h1>

@@ -41,7 +41,7 @@ function EditSong({song}) {
 
         axios
             .patch(`${server}/api/songs/${songId}/`, payload)
-            .then(router.replace(router.asPath))
+            .then(() => router.replace(router.asPath))
             .catch((err) => console.log(err));
     };
 
@@ -49,7 +49,7 @@ function EditSong({song}) {
         if (confirm(`Ar tikrai norite ištrinti kūrinį "${song.title}"?`)) {
             axios
                 .delete(`${server}/api/songs/${songId}/`)
-                .then(router.replace("/"))
+                .then(() => router.replace("/"))
                 .catch((err) => console.log(err));
         }
     };

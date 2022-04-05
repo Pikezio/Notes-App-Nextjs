@@ -1,7 +1,7 @@
 import {
   postInstruments,
   getInstrumentsJson,
-} from "../../../../controllers/collectiveController";
+} from "../../../../controllers/instrumentController";
 import globalHandler from "../../../../middleware/globalHandler";
 import { isUserCollectiveOwner } from "../../../../middleware/isUserCollectiveOwner";
 import { isUserCollectiveMember } from "../../../../middleware/isUserCollectiveMember";

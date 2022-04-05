@@ -1,4 +1,5 @@
 import Song from "../models/Song";
+import {forEach} from "react-bootstrap/ElementChildren";
 
 //Route: /collectives/[collectiveId]/songs - POST, GET
 
@@ -22,7 +23,13 @@ async function getPartOfSong(req) {
 }
 
 async function getSong(songId) {
-    const song = await Song.findById(songId);
+    const song = await Song.findById(songId).select(
+        {
+            _id: 1, title: 1, composer: 1, arranger: 1, collectiveId: 1,
+            "parts._id": 1,
+            "parts.instrument": 1,
+            "parts.filename": 1
+        });
     return JSON.stringify(song);
 }
 
@@ -68,7 +75,7 @@ async function updatePart(req) {
         },
         setObject
     );
-    return {};
+    return setObject;
 }
 
 async function deletePart(req) {
@@ -82,9 +89,28 @@ async function deletePart(req) {
 async function addPart(req) {
     const {songId} = req.query
     const song = await Song.findById(songId);
-    song.parts.push(req.body);
+    req.body.map(part => {
+        song.parts.push(part)
+    })
     await song.save();
     return {};
+}
+
+async function getSongCollectiveId(req) {
+    const {songId} = req.query
+    const songCollectiveId = await Song.findById(songId).select("collectiveId");
+    return songCollectiveId
+}
+
+async function getSongNamesByPart(req) {
+    const {collectiveId, instrument} = req.query
+    const songNames = await Song.find({
+        collectiveId,
+        "parts.instrument": instrument
+    }, {
+        title: 1
+    })
+    return songNames
 }
 
 module.exports = {
@@ -96,5 +122,7 @@ module.exports = {
     updateSong,
     updatePart,
     deletePart,
-    addPart
+    addPart,
+    getSongCollectiveId,
+    getSongNamesByPart,
 };

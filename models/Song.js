@@ -17,6 +17,9 @@ const SongSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
+      filename: {
+        type: String,
+      },
       file: {
         type: String,
         required: true,

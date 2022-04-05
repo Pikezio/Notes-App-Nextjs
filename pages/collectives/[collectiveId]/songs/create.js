@@ -3,13 +3,10 @@ import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import FileUpload from "../../../components/files/FileUpload";
 import { useRouter } from "next/router";
 import { server } from "../../../../util/urlConfig";
-import { useSession } from "next-auth/react";
 import axios from "axios";
 import { toBase64 } from "../../../../util/toBase64";
 
 export default function CreateSong({ owner }) {
-  const session = useSession();
-
   const router = useRouter();
   const { collectiveId } = router.query;
 
@@ -18,8 +15,8 @@ export default function CreateSong({ owner }) {
   const composerRef = useRef();
   const arrangerRef = useRef();
 
-  const [parts, setParts] = useState();
-  const [instruments, setInstruments] = useState();
+  const [parts, setParts] = useState([]);
+  const [instruments, setInstruments] = useState([]);
 
   const url = `/api/collectives/${collectiveId}/songs`;
 
@@ -40,6 +37,7 @@ export default function CreateSong({ owner }) {
     let newState = Array.from(e.target.files).map((file) => {
       return {
         file: file,
+        filename: file.name,
         instrument: "undefined",
       };
     });
@@ -55,19 +53,7 @@ export default function CreateSong({ owner }) {
   }
 
   const submitForm = async (data) => {
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error(res.status);
-      router.push("/");
-    } catch (error) {
-      console.log(error);
-    }
+    axios.post(url, data).then(router.push("/")).catch(err => console.log(err))
   };
 
   const constructData = async () => {
@@ -84,7 +70,6 @@ export default function CreateSong({ owner }) {
         return item;
       })
     );
-    console.log(fullObject);
     const fullObject = { ...songData, parts: base64parts };
     await submitForm(fullObject);
   };

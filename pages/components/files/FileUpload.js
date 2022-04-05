@@ -23,7 +23,7 @@ export default function FileUpload({
     ? parts.map((part, partId) => (
         <ListGroup.Item key={partId}>
           <Row>
-            <Col>{part.file.name}</Col>
+            <Col>{part.filename}</Col>
             <Col md="auto">
               <Form.Select onChange={(e) => handleDropDownChange(e, partId)}>
                 {dropDownList}
