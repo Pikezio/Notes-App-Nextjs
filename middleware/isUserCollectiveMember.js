@@ -2,7 +2,7 @@ import { getCollectiveMember } from "../controllers/collectiveController";
 import { getCollectiveOwner } from "../controllers/collectiveController";
 
 // collectiveId must be in URL and userId must be in request
-async function isUserCollectiveMember(req, res, next) {
+export async function isUserCollectiveMember(req, res, next) {
   const { collectiveId } = req.query;
 
   const ownerId = await getCollectiveOwner(collectiveId);
@@ -19,7 +19,7 @@ async function isUserCollectiveMember(req, res, next) {
   next();
 }
 
-async function isMember(collectiveId, userId) {
+export async function isMember(collectiveId, userId) {
   const collective = await getCollectiveMember(collectiveId, userId);
   if (
     !collective ||
@@ -32,8 +32,3 @@ async function isMember(collectiveId, userId) {
 
   return true;
 }
-
-module.exports = {
-  isMember,
-  isUserCollectiveMember,
-};

@@ -4,7 +4,7 @@ import dbConnect from "../util/dbConnect";
 //Route: /collectives - POST, GET
 
 // Gets all owned and joined collectives for a user
-async function getCollectives(userId) {
+export async function getCollectives(userId) {
   await dbConnect();
   const ownedCollectives = await Collective.find({ owner: userId }, "id title");
   const memberInCollectives = await Collective.find(
@@ -21,7 +21,7 @@ async function getCollectives(userId) {
 }
 
 // Gets all collectives that are not joined by the user
-async function getAllCollectives(userId) {
+export async function getAllCollectives(userId) {
   await dbConnect();
   const unjoinedCollectives = await Collective.find({
     owner: { $ne: userId },
@@ -40,13 +40,13 @@ async function getAllCollectives(userId) {
 }
 
 // Gets all members for a specific collectiveId
-async function getCollectiveMembers(collectiveId) {
+export async function getCollectiveMembers(collectiveId) {
   const members = await Collective.findById(collectiveId).select("members");
   return JSON.stringify(members);
 }
 
 // Get specific collective member by ID
-async function getCollectiveMember(collectiveId, memberUserId) {
+export async function getCollectiveMember(collectiveId, memberUserId) {
   await dbConnect();
   const member = await Collective.findOne(
     {
@@ -60,20 +60,20 @@ async function getCollectiveMember(collectiveId, memberUserId) {
   return member;
 }
 
-async function getCollective(id) {
+export async function getCollective(id) {
   await dbConnect();
   const collective = await Collective.findById(id);
   return JSON.stringify(collective);
 }
 
 // Gets the owner of collective
-async function getCollectiveOwner(id) {
+export async function getCollectiveOwner(id) {
   await dbConnect();
   const collective = await Collective.findById(id);
   return collective.owner;
 }
 
-async function postCollective(req) {
+export async function postCollective(req) {
   const createdCollective = await Collective.create({
     ...req.body,
     owner: req.userId,
@@ -82,7 +82,7 @@ async function postCollective(req) {
   return createdCollective;
 }
 
-async function updateCollective(req) {
+export async function updateCollective(req) {
   const { collectiveId } = req.query;
   const updated = await Collective.findOneAndUpdate(
     {
@@ -94,22 +94,10 @@ async function updateCollective(req) {
   return updated;
 }
 
-async function deleteCollective(req) {
+export async function deleteCollective(req) {
   const { collectiveId } = req.query;
   const deleted = await Collective.findOneAndDelete({
     _id: collectiveId,
   });
   return deleted;
 }
-
-module.exports = {
-  getCollectives,
-  postCollective,
-  updateCollective,
-  deleteCollective,
-  getCollective,
-  getCollectiveOwner,
-  getAllCollectives,
-  getCollectiveMembers,
-  getCollectiveMember,
-};
