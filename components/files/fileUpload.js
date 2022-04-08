@@ -8,7 +8,6 @@ export default function FileUpload({
 }) {
   const dropDownList = (
     <>
-      <option>Pasirinkite instrumentą</option>
       {instrumentList &&
         instrumentList.map((i, idx) => (
           <option key={idx} value={i}>
@@ -21,15 +20,17 @@ export default function FileUpload({
   // Constructs a list of files with dropdown menus.
   const selectedParts = parts
     ? parts.map((part, partId) => (
-        <ListGroup.Item key={partId}>
-          <Row>
-            <Col>{part.filename}</Col>
-            <Col md="auto">
-              <Form.Select onChange={(e) => handleDropDownChange(e, partId)}>
-                {dropDownList}
-              </Form.Select>
-            </Col>
-          </Row>
+        <ListGroup.Item
+          key={partId}
+          className="d-flex justify-content-between align-items-center"
+        >
+          {part.filename}
+          <Form.Select
+            onChange={(e) => handleDropDownChange(e, partId)}
+            style={{ width: "100px" }}
+          >
+            {dropDownList}
+          </Form.Select>
         </ListGroup.Item>
       ))
     : "Nepasirinkta jokių failų.";
@@ -37,12 +38,14 @@ export default function FileUpload({
   return (
     <div>
       {/* Input */}
-      <Form.Group controlId="formFileMultiple" className="mb-3">
-        <Form.Label>Partijos</Form.Label>
+      <Form.Group controlId="formFileMultiple" className="my-3">
+        <Form.Label>
+          <h4>Pasirinkti failai</h4>
+        </Form.Label>
         <Form.Control type="file" multiple onChange={handleFileChange} />
       </Form.Group>
       {/* List selected files */}
-      Pasirinkti failai:
+
       <ListGroup>{selectedParts}</ListGroup>
     </div>
   );

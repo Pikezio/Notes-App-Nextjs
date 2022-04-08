@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import FileUpload from "../../../components/files/FileUpload";
+import FileUpload from "../../../../components/files/fileUpload";
 import { useRouter } from "next/router";
 import { server } from "../../../../util/urlConfig";
 import axios from "axios";
@@ -53,7 +53,10 @@ export default function CreateSong({ owner }) {
   }
 
   const submitForm = async (data) => {
-    axios.post(url, data).then(router.push("/")).catch(err => console.log(err))
+    axios
+      .post(url, data)
+      .then(router.push("/"))
+      .catch((err) => console.log(err));
   };
 
   const constructData = async () => {

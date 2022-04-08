@@ -1,6 +1,5 @@
-import "../styles/globals.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import Layout from "./components/layout";
+import "bootstrap/dist/css/bootstrap.css";
+import Layout from "../components/layout";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
 import { RecoilRoot } from "recoil";
 import React from "react";

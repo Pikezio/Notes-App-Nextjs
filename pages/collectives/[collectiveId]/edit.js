@@ -6,6 +6,7 @@ import axios from "axios";
 import { server } from "../../../util/urlConfig";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import { Container, Form, Button } from "react-bootstrap";
 
 const EditCollective = ({ collective, collectiveId }) => {
   const createdDate = new Date(collective.createdAt).toLocaleString("lt-LT");
@@ -55,34 +56,74 @@ const EditCollective = ({ collective, collectiveId }) => {
   };
 
   return (
-    <div>
-      <h1>Kolektyvo {collective.title} nustatymai</h1>
-      <label htmlFor="title">Pavadinimas</label>
-      <input
-        type="text"
-        name="title"
-        value={newData.title}
-        onChange={(e) => setNewData({ ...newData, title: e.target.value })}
-      />
+    <Container>
+      <Form>
+        <Form.Group className="d-flex justify-content-between align-items-center">
+          <div>
+            <Form.Label>Pavadinimas</Form.Label>
+            <Form.Control
+              type="text"
+              name="title"
+              value={newData.title}
+              onChange={(e) =>
+                setNewData({ ...newData, title: e.target.value })
+              }
+              className="mb-2"
+            />
+          </div>
+          <div>
+            <Form.Label>Logotipas</Form.Label>
+            <br />
+            {collective.logo && (
+              <Image
+                className="rounded"
+                src={collective.logo}
+                alt="Logo"
+                width={100}
+                height={100}
+              />
+            )}
+          </div>
+        </Form.Group>
 
-      <label htmlFor="logo">Logotipas</label>
-      {collective.logo && (
-        <Image src={collective.logo} alt="Logo" width={300} height={300} />
-      )}
-
-      <input
-        type="file"
-        name="logo"
-        onChange={(e) => setNewData({ ...newData, logo: e.target.files[0] })}
-      />
-
-      <p>Sukūrimo data: {createdDate}</p>
-      <p>Paskutinio atnaujinimo data: {updatedData}</p>
-      <button disabled={!showSaveButton} onClick={submitEdit}>
-        Išsaugoti pakeitimus
-      </button>
-      <button onClick={confirmDelete}>Ištrinti kolektyvą</button>
-    </div>
+        <Form.Control
+          type="file"
+          name="logo"
+          className="mb-2"
+          onChange={(e) => setNewData({ ...newData, logo: e.target.files[0] })}
+        />
+        <div className="d-flex justify-content-between align-items-center">
+          <Form.Label htmlFor="collectiveColor">Kolektyvo spalva</Form.Label>
+          <Form.Control
+            type="color"
+            id="collectiveColor"
+            defaultValue="#563d7c"
+            title="Pasirinkite kolektyvo spalvą"
+            className="mb-2 ml-2"
+          />
+        </div>
+        <div className="d-flex justify-content-between">
+          <p>Sukūrimo data</p>
+          <strong>{createdDate}</strong>
+        </div>
+        <div className="d-flex justify-content-between">
+          <p>Paskutinio atnaujinimo data</p>
+          <strong>{updatedData}</strong>
+        </div>
+        <div className="d-flex justify-content-between justify-content-sm-start">
+          <Button
+            variant="success"
+            disabled={!showSaveButton}
+            onClick={submitEdit}
+          >
+            Išsaugoti pakeitimus
+          </Button>
+          <Button variant="danger" className="mx-2" onClick={confirmDelete}>
+            Ištrinti kolektyvą
+          </Button>
+        </div>
+      </Form>
+    </Container>
   );
 };
 

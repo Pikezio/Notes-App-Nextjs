@@ -4,6 +4,7 @@ import { getAllCollectives } from "../../controllers/collectiveController";
 import { server } from "../../util/urlConfig";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { Badge, Button, Container, ListGroup } from "react-bootstrap";
 
 function ListOfAllCollectives({ collectives }) {
   const router = useRouter();
@@ -17,25 +18,35 @@ function ListOfAllCollectives({ collectives }) {
   };
 
   return (
-    <div>
+    <Container>
       <h1>Visi kolektyvai</h1>
-      {collectives.unjoinedCollectives.map((collective) => (
-        <div key={collective._id}>
-          <li>{collective.title}</li>
-          <button onClick={() => submitJoin(collective._id)}>
-            Prisijungti
-          </button>
-        </div>
-      ))}
-
-      {collectives.joinedCollectives.map((collective) => (
-        <div key={collective._id}>
-          <li>
-            {collective.title} <strong>{collective.members[0].status}</strong>
-          </li>
-        </div>
-      ))}
-    </div>
+      <h3>Prisijungta</h3>
+      <ListGroup className="mb-2">
+        {collectives.joinedCollectives.map((collective) => (
+          <ListGroup.Item key={collective._id}>
+            <div className="d-flex justify-content-between">
+              {collective.title}
+              <Badge>
+                {collective.members[0].status === "Requested" && "Prašoma"}
+              </Badge>
+            </div>
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+      <h3>Neprisijungta</h3>
+      <ListGroup>
+        {collectives.unjoinedCollectives.map((collective) => (
+          <ListGroup.Item key={collective._id}>
+            <div className="d-flex justify-content-between">
+              {collective.title}
+              <Button onClick={() => submitJoin(collective._id)}>
+                Prisijungti
+              </Button>
+            </div>
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+    </Container>
   );
 }
 

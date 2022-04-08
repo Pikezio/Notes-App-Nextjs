@@ -1,9 +1,9 @@
-import CustomNavbar from "./CustomNavbar";
+import Navbar from "./navbar";
 
 export default function Layout({ children }) {
   return (
     <>
-      <CustomNavbar />
+      <Navbar />
       <main>{children}</main>
     </>
   );

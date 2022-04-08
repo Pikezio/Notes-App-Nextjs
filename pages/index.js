@@ -1,16 +1,16 @@
 import { getSession } from "next-auth/react";
 import { getCollectives } from "../controllers/collectiveController";
-import ListOfCollectives from "./components/ListOfCollectives";
+import ListOfCollectives from "../components/collectiveList";
 
 export default function Home({ owned, member }) {
   return (
     <>
-      <h1>Calendar</h1>
-      <li>Concert 1 2023-01-14</li>
-      <li>Concert 1 2023-01-14</li>
-      <p>calendar box with dates marked</p>
-
       <ListOfCollectives owned={owned} member={member} />
+
+      {/* <h1>Calendar</h1>
+      <li>Concert 1 2023-01-14</li>
+      <li>Concert 1 2023-01-14</li>
+      <p>calendar box with dates marked</p> */}
     </>
   );
 }

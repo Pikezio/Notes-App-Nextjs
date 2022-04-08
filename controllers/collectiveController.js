@@ -6,14 +6,17 @@ import dbConnect from "../util/dbConnect";
 // Gets all owned and joined collectives for a user
 export async function getCollectives(userId) {
   await dbConnect();
-  const ownedCollectives = await Collective.find({ owner: userId }, "id title");
+  const ownedCollectives = await Collective.find(
+    { owner: userId },
+    "title logo"
+  );
   const memberInCollectives = await Collective.find(
     {
       owner: { $ne: userId },
       "members.userId": userId,
       "members.status": "Accepted",
     },
-    "id title"
+    "title logo"
   );
   return JSON.stringify({
     data: { owned: ownedCollectives, member: memberInCollectives },

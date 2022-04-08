@@ -5,6 +5,7 @@ import { server } from "../../../util/urlConfig";
 import { getSession } from "next-auth/react";
 import { getSongCollectiveId } from "../../../controllers/songController";
 import { getInstruments } from "../../../controllers/instrumentController";
+import { Container, FloatingLabel, Form } from "react-bootstrap";
 
 export default function SongDetails({ instruments }) {
   const router = useRouter();
@@ -47,9 +48,8 @@ export default function SongDetails({ instruments }) {
   }, [selectedInstrument, songId]);
 
   const partSelector = (
-    <p>
-      Partija:
-      <select
+    <FloatingLabel controlId="floatingSelect" label="Partija" className="mb-2">
+      <Form.Select
         name="part"
         id="part"
         onChange={(e) => setSelectedInstrument(e.target.value)}
@@ -61,28 +61,37 @@ export default function SongDetails({ instruments }) {
               {i}
             </option>
           ))}
-      </select>
-    </p>
+      </Form.Select>
+    </FloatingLabel>
   );
 
   // TODO: make a loading bar
   return (
-    <div>
+    <Container>
       {song ? (
-        <div>
-          <h1>Pavadinimas: {song.title}</h1>
-          <h3>Kompozitorius: {song.composer}</h3>
-          <h3>Aranžuotojas: {song.arranger}</h3>
-          {partSelector}
-          <embed src={song.parts[0].file} width="80%" height="auto" />
-        </div>
+        <>
+          <div>
+            <h1>Pavadinimas: {song.title}</h1>
+            <h3>Kompozitorius: {song.composer}</h3>
+            <h3>Aranžuotojas: {song.arranger}</h3>
+            {partSelector}
+          </div>
+          <div className="embed-responsive ">
+            <embed
+              className="embed-responsive-item"
+              src={song.parts[0].file}
+              width="100%"
+              height="600"
+            />
+          </div>
+        </>
       ) : (
         <>
           <h1>Nėra tokios partijos...</h1>
           {partSelector}
         </>
       )}
-    </div>
+    </Container>
   );
 }
 

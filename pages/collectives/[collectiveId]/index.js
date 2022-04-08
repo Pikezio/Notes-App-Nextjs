@@ -12,6 +12,15 @@ import { isMember } from "../../../middleware/isUserCollectiveMember";
 import { server } from "../../../util/urlConfig";
 import { instrumentState } from "../../../atoms";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import {
+  Container,
+  FloatingLabel,
+  Form,
+  ListGroup,
+  Button,
+  Badge,
+} from "react-bootstrap";
 
 function Collective({ data, collective }) {
   const router = useRouter();
@@ -54,17 +63,27 @@ function Collective({ data, collective }) {
 
   if (data.member || data.owner) {
     return (
-      <div>
-        <h1>Pavadinimas: {collective.title}</h1>
-        <embed src={collective.logo} width="50px" />
-        <h3>Savininkas: {data.owner ? "Taip" : "Ne"}</h3>
-        <p>
-          Instrumentas:
-          <select
+      <Container>
+        <div className="d-flex justify-content-between">
+          <h1>{collective.title}</h1>
+          {collective.logo && (
+            <Image
+              alt="logo"
+              width={75}
+              height={75}
+              src={collective.logo}
+              className="rounded"
+            />
+          )}
+        </div>
+
+        <FloatingLabel controlId="floatingSelect" label="Partija">
+          <Form.Select
             name="part"
             id="part"
             onChange={onInstrumentChange}
             value={selectedInstrument ? selectedInstrument : "Nepasirinktas"}
+            className="mb-2"
           >
             {collective.instruments &&
               collective.instruments.map((i, idx) => (
@@ -72,65 +91,86 @@ function Collective({ data, collective }) {
                   {i}
                 </option>
               ))}
-          </select>
-        </p>
-        <h2>Kūriniai:</h2>
-        <ul>
+          </Form.Select>
+        </FloatingLabel>
+        <h2>Kūriniai</h2>
+
+        <ListGroup variant="flush">
           {songs &&
             songs.map((s) => (
-              <div key={s._id}>
-                <li>
-                  <Link href={`/songs/${s._id}?part=${selectedInstrument}`}>
-                    <a>{s.title}</a>
-                  </Link>
-                </li>
+              <ListGroup.Item
+                key={s._id}
+                className="d-flex justify-content-between align-items-center"
+              >
+                <Link href={`/songs/${s._id}?part=${selectedInstrument}`}>
+                  <a>{s.title}</a>
+                </Link>
                 {data.owner && (
-                  <Link href={`/songs/${s._id}/edit`}> Redaguoti</Link>
+                  <Link href={`/songs/${s._id}/edit`} passHref>
+                    <Button>Redaguoti</Button>
+                  </Link>
                 )}
-              </div>
+              </ListGroup.Item>
             ))}
-        </ul>
+        </ListGroup>
 
         {data.owner && (
-          <>
-            <Link href={`${collectiveId}/songs/create`}>
-              <a>Pridėti kūrinį</a>
-            </Link>
-            <p>
-              <Link href={`${collectiveId}/instruments`}>
-                <a>Redaguoti instrumentus</a>
+          <div>
+            <div className="d-flex mb-2">
+              <Link href={`${collectiveId}/songs/create`} passHref>
+                <Button variant="dark" className="mx-2 my-1">
+                  Pridėti kūrinį
+                </Button>
               </Link>
-            </p>
-            <p>
-              <Link href={`${collectiveId}/edit`}>
-                <a>Redaguoti kolektyvą</a>
+              <Link href={`${collectiveId}/instruments`} passHref>
+                <Button variant="dark" className="mx-2 my-1">
+                  Redaguoti instrumentus
+                </Button>
               </Link>
-            </p>
+              <Link href={`${collectiveId}/edit`} passHref>
+                <Button variant="dark" className="mx-2 my-1">
+                  Redaguoti kolektyvą
+                </Button>
+              </Link>
+            </div>
 
             <h3>Kolektyvo nariai</h3>
-            {data.requestedUsers &&
-              data.requestedUsers.map((user) => (
-                <li key={user._id}>
-                  {user._id}
-                  {user.name} <strong>{user.status}</strong>
-                  {user.status === "Requested" && (
-                    <>
-                      <button onClick={() => modifyUser(user._id, "accept")}>
-                        Accept
-                      </button>
-                      <button onClick={() => modifyUser(user._id, "decline")}>
-                        Decline
-                      </button>
-                    </>
-                  )}
-                </li>
-              ))}
-          </>
+            <ListGroup>
+              {data.requestedUsers &&
+                data.requestedUsers.map((user) => (
+                  <ListGroup.Item
+                    key={user._id}
+                    className="d-flex justify-content-between"
+                  >
+                    {user.name}{" "}
+                    <Badge bg="danger">
+                      {user.status === "Declined" && "Atmestas"}
+                    </Badge>
+                    {user.status === "Requested" && (
+                      <>
+                        <Button
+                          variant="success"
+                          onClick={() => modifyUser(user._id, "accept")}
+                        >
+                          Priimti
+                        </Button>
+                        <Button
+                          variant="danger"
+                          onClick={() => modifyUser(user._id, "decline")}
+                        >
+                          Nepriimti
+                        </Button>
+                      </>
+                    )}
+                  </ListGroup.Item>
+                ))}
+            </ListGroup>
+          </div>
         )}
-      </div>
+      </Container>
     );
   } else {
-    return <h1>No access.</h1>;
+    return <h1>Nėra prieigos.</h1>;
   }
 }
 
