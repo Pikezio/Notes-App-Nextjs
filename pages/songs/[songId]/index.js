@@ -7,12 +7,12 @@ import {
 import { getInstruments } from "../../../controllers/instrumentController";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import YoutubePlayer from "../../../components/youtubePlayer";
 
 export default function SongDetails({ part, filteredInstruments }) {
   const router = useRouter();
   const { songId } = router.query;
 
-  // TODO: make a loading bar
   return (
     <Container>
       {part ? (
@@ -47,11 +47,11 @@ export default function SongDetails({ part, filteredInstruments }) {
                 )
             )}
           </div>
+          {part.video && <YoutubePlayer videoUrl={part.video} />}
         </>
       ) : (
         <>
           <h1>Nėra tokios partijos...</h1>
-          {/* {partSelector} */}
         </>
       )}
     </Container>

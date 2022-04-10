@@ -5,12 +5,9 @@ const SongSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  composer: {
-    type: String,
-  },
-  arranger: {
-    type: String,
-  },
+  composer: String,
+  arranger: String,
+  video: String,
   parts: [
     {
       instrument: {
@@ -32,6 +29,6 @@ const SongSchema = new mongoose.Schema({
   },
 });
 
-SongSchema.index({title: "text", composer: "text", arranger: "text" })
+SongSchema.index({ title: "text", composer: "text", arranger: "text" });
 
 export default mongoose.models.Song || mongoose.model("Song", SongSchema);

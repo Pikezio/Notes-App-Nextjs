@@ -28,6 +28,7 @@ function Collective({ data, collective }) {
   const [songs, setSongs] = useState([]);
   const [selectedInstrument, setSelectedInstrument] =
     useRecoilState(instrumentState);
+  const [sort, setSort] = useState(false);
 
   // Refetch when instrument changes
   useEffect(() => {
@@ -92,6 +93,7 @@ function Collective({ data, collective }) {
             value={selectedInstrument ? selectedInstrument : "Nepasirinktas"}
             className="mb-2"
           >
+            <option value="Visi">Visi</option>
             {collective.instruments &&
               collective.instruments.map((i, idx) => (
                 <option key={idx} value={i}>
@@ -100,25 +102,38 @@ function Collective({ data, collective }) {
               ))}
           </Form.Select>
         </FloatingLabel>
-        <h2>Kūriniai</h2>
+        <div className="d-flex justify-content-between align-items-center">
+          <h2>Kūriniai</h2>
+          <Button variant="dark" onClick={() => setSort(!sort)}>
+            {sort ? "z-a" : "a-z"}
+          </Button>
+        </div>
 
         <ListGroup variant="flush">
           {songs &&
-            songs.map((s) => (
-              <ListGroup.Item
-                key={s._id}
-                className="d-flex justify-content-between align-items-center"
-              >
-                <Link href={`/songs/${s._id}?part=${selectedInstrument}`}>
-                  <a>{s.title}</a>
-                </Link>
-                {data.owner && (
-                  <Link href={`/songs/${s._id}/edit`} passHref>
-                    <Button>Redaguoti</Button>
+            songs
+              .sort((a, b) => {
+                if (a.title.toLowerCase() < b.title.toLowerCase())
+                  return sort ? -1 : 1;
+                if (a.title.toLowerCase() > b.title.toLowerCase())
+                  return sort ? 1 : -1;
+                return 0;
+              })
+              .map((s) => (
+                <ListGroup.Item
+                  key={s._id}
+                  className="d-flex justify-content-between align-items-center"
+                >
+                  <Link href={`/songs/${s._id}?part=${selectedInstrument}`}>
+                    <a>{s.title}</a>
                   </Link>
-                )}
-              </ListGroup.Item>
-            ))}
+                  {data.owner && (
+                    <Link href={`/songs/${s._id}/edit`} passHref>
+                      <Button>Redaguoti</Button>
+                    </Link>
+                  )}
+                </ListGroup.Item>
+              ))}
         </ListGroup>
 
         {data.owner && (

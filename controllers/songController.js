@@ -67,14 +67,7 @@ export async function searchSongs(collectiveId, search) {
 
 export async function getSong(songId) {
   const song = await Song.findById(songId).select({
-    _id: 1,
-    title: 1,
-    composer: 1,
-    arranger: 1,
-    collectiveId: 1,
-    "parts._id": 1,
-    "parts.instrument": 1,
-    "parts.filename": 1,
+    "parts.file": 0,
   });
   return JSON.stringify(song);
 }

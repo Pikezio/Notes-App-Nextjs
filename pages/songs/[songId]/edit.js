@@ -64,7 +64,7 @@ export async function getServerSideProps(context) {
   return {
     props: {
       song,
-      instrumentList: instrumentList.instruments,
+      instrumentList: instrumentList,
     },
   };
 }

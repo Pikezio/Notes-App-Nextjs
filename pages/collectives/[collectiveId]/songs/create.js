@@ -14,6 +14,7 @@ export default function CreateSong({ owner }) {
   const titleRef = useRef();
   const composerRef = useRef();
   const arrangerRef = useRef();
+  const videoRef = useRef();
 
   const [parts, setParts] = useState([]);
   const [instruments, setInstruments] = useState([]);
@@ -64,6 +65,7 @@ export default function CreateSong({ owner }) {
       title: titleRef.current.value,
       composer: composerRef.current.value,
       arranger: arrangerRef.current.value,
+      video: videoRef.current.value,
     };
 
     const base64parts = await Promise.all(
@@ -107,6 +109,15 @@ export default function CreateSong({ owner }) {
             />
           </Form.Group>
         </Row>
+        <Form.Group className="mb-3">
+          <Form.Label>Video nuoroda</Form.Label>
+          <Form.Control
+            size="lg"
+            type="text"
+            placeholder="Video"
+            ref={videoRef}
+          />
+        </Form.Group>
 
         <FileUpload
           handleDropDownChange={handleDropDownChange}

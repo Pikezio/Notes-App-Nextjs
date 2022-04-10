@@ -13,6 +13,7 @@ export async function getSpecificPart(songId, part) {
       composer: 1,
       arranger: 1,
       collectiveId: 1,
+      video: 1,
       "parts.$": 1,
     }
   );
@@ -22,6 +23,7 @@ export async function getSpecificPart(songId, part) {
       title: song.title,
       composer: song.composer,
       arranger: song.arranger,
+      video: song.video,
       instrument: song.parts[0].instrument,
       filename: song.parts[0].filename,
       file: song.parts[0].file,

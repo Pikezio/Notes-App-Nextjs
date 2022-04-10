@@ -7,16 +7,24 @@ const handler = globalHandler()
   // Gets all songs that have a specific instrument part
   .get(async (req, res) => {
     const { collectiveId, instrument } = req.query;
-    const songNames = await Song.find(
-      {
-        collectiveId,
-        "parts.instrument": instrument,
-      },
-      {
-        title: 1,
-      }
-    );
-    res.send(songNames);
+    if (instrument === "Visi") {
+      const songs = await Song.find(
+        { collectiveId: collectiveId },
+        { title: 1 }
+      );
+      res.json(songs);
+    } else {
+      const songNames = await Song.find(
+        {
+          collectiveId,
+          "parts.instrument": instrument,
+        },
+        {
+          title: 1,
+        }
+      );
+      res.send(songNames);
+    }
   });
 
 export default handler;

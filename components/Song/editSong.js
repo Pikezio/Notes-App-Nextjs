@@ -10,13 +10,15 @@ function EditSong({ song }) {
     title: song.title,
     composer: song.composer,
     arranger: song.arranger,
+    video: song.video,
   });
 
   const songId = song._id;
   const showSaveButton =
     newSongData.title !== song.title ||
     newSongData.composer !== song.composer ||
-    newSongData.arranger !== song.arranger;
+    newSongData.arranger !== song.arranger ||
+    newSongData.video !== song.video;
 
   const submitEdit = async () => {
     // Construct the payload for updating the specific elements
@@ -39,6 +41,13 @@ function EditSong({ song }) {
       payload = {
         ...payload,
         arranger: newSongData.arranger,
+      };
+    }
+
+    if (newSongData.video !== song.video) {
+      payload = {
+        ...payload,
+        video: newSongData.video,
       };
     }
 
@@ -88,6 +97,17 @@ function EditSong({ song }) {
         value={newSongData.arranger}
         onChange={(e) =>
           setNewSongData({ ...newSongData, arranger: e.target.value })
+        }
+        className="mb-2"
+      />
+
+      <Form.Label>Video</Form.Label>
+      <Form.Control
+        type="text"
+        name="video"
+        value={newSongData.video}
+        onChange={(e) =>
+          setNewSongData({ ...newSongData, video: e.target.value })
         }
         className="mb-2"
       />
