@@ -11,6 +11,7 @@ const CollectiveSchema = new mongoose.Schema(
       required: true,
     },
     logo: String,
+    color: String,
     members: [
       {
         userId: {

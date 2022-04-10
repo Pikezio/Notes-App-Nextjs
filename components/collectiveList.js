@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Container, Navbar, Image, Card, ListGroup } from "react-bootstrap";
+import { Container, Image, Card, ListGroup } from "react-bootstrap";
 
 function ListOfCollectives({ owned, member }) {
   return (
@@ -8,21 +8,25 @@ function ListOfCollectives({ owned, member }) {
         <Card.Header>Savininkas</Card.Header>
         <ListGroup variant="flush">
           {owned.map((collective) => (
-            <ListGroup.Item
+            <Link
+              passHref
               key={collective._id}
-              className="d-flex align-items-center"
+              href={`/collectives/${collective._id}`}
             >
-              <Image
-                alt="logo"
-                width={30}
-                height={30}
-                src={collective.logo}
-                rounded
-              />
-              <Link href={`/collectives/${collective._id}`}>
-                {collective.title}
-              </Link>
-            </ListGroup.Item>
+              <ListGroup.Item
+                role="button"
+                className="d-flex align-items-center justify-content-between"
+              >
+                <div className="lead">{collective.title}</div>
+                <Image
+                  alt="logo"
+                  width={30}
+                  height={30}
+                  src={collective.logo}
+                  rounded
+                />
+              </ListGroup.Item>
+            </Link>
           ))}
         </ListGroup>
       </Card>
@@ -31,20 +35,27 @@ function ListOfCollectives({ owned, member }) {
         <Card.Header>Narys</Card.Header>
         <ListGroup variant="flush">
           {member.map((collective) => (
-            <ListGroup.Item key={collective._id}>
-              {collective.logo && (
-                <Image
-                  alt="logo"
-                  width={30}
-                  height={30}
-                  src={collective.logo}
-                  rounded
-                />
-              )}
-              <Link href={`/collectives/${collective._id}`}>
-                {collective.title}
-              </Link>
-            </ListGroup.Item>
+            <Link
+              key={collective._id}
+              passHref
+              href={`/collectives/${collective._id}`}
+            >
+              <ListGroup.Item
+                role="button"
+                className="d-flex align-items-center justify-content-between"
+              >
+                <div className="lead">{collective.title}</div>
+                {collective.logo && (
+                  <Image
+                    alt="logo"
+                    width={30}
+                    height={30}
+                    src={collective.logo}
+                    rounded
+                  />
+                )}
+              </ListGroup.Item>
+            </Link>
           ))}
         </ListGroup>
       </Card>

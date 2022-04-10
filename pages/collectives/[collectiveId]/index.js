@@ -64,13 +64,20 @@ function Collective({ data, collective }) {
   if (data.member || data.owner) {
     return (
       <Container>
-        <div className="d-flex justify-content-between">
-          <h1>{collective.title}</h1>
+        <div
+          className="d-flex justify-content-between
+           align-items-center p-2 px-4 mb-2 rounded border"
+          style={{ background: collective.color }}
+        >
+          <div>
+            <small>Kolektyvas</small>
+            <h1>{collective.title}</h1>
+          </div>
           {collective.logo && (
             <Image
               alt="logo"
-              width={75}
-              height={75}
+              width={50}
+              height={50}
               src={collective.logo}
               className="rounded"
             />

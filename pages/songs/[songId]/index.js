@@ -1,94 +1,57 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useRouter } from "next/router";
-import { server } from "../../../util/urlConfig";
 import { getSession } from "next-auth/react";
-import { getSongCollectiveId } from "../../../controllers/songController";
+import { Card, Container } from "react-bootstrap";
+import {
+  doesPartExistForInstrument,
+  getSpecificPart,
+} from "../../../controllers/partController";
 import { getInstruments } from "../../../controllers/instrumentController";
-import { Container, FloatingLabel, Form } from "react-bootstrap";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
-export default function SongDetails({ instruments }) {
+export default function SongDetails({ part, filteredInstruments }) {
   const router = useRouter();
-  const { songId, part, collectiveId } = router.query;
-  const [song, setSong] = useState(null);
-  const [selectedInstrument, setSelectedInstrument] = useState("");
-
-  useEffect(() => {
-    const fetchPart = async (part) => {
-      return await axios.get(`${server}/api/songs/${songId}?part=${part}`);
-    };
-
-    const getPart = async () => {
-      // If URL doesn't specify part, get from storage
-      if (part == null && collectiveId != null) {
-        const localPart = localStorage.getItem(collectiveId);
-        if (!router.isReady) return;
-        const response = await fetchPart(localPart);
-        setSong(response.data);
-        setSelectedInstrument(localPart);
-      } // If URL does specify get from url
-      else {
-        const response = await fetchPart(part);
-        setSong(response.data);
-        setSelectedInstrument(part);
-      }
-    };
-    getPart();
-  }, [part, songId, router.isReady, collectiveId]);
-
-  // Refetch when instrument changes
-  useEffect(() => {
-    const getPart = async () => {
-      const response = await axios.get(
-        `${server}/api/songs/${songId}?part=${selectedInstrument}`
-      );
-      setSong(response.data);
-    };
-    getPart();
-  }, [selectedInstrument, songId]);
-
-  const partSelector = (
-    <FloatingLabel controlId="floatingSelect" label="Partija" className="mb-2">
-      <Form.Select
-        name="part"
-        id="part"
-        onChange={(e) => setSelectedInstrument(e.target.value)}
-        value={selectedInstrument ? selectedInstrument : "---"}
-      >
-        {instruments &&
-          instruments.map((i, idx) => (
-            <option key={idx} value={i}>
-              {i}
-            </option>
-          ))}
-      </Form.Select>
-    </FloatingLabel>
-  );
+  const { songId } = router.query;
 
   // TODO: make a loading bar
   return (
     <Container>
-      {song ? (
+      {part ? (
         <>
-          <div>
-            <h1>Pavadinimas: {song.title}</h1>
-            <h3>Kompozitorius: {song.composer}</h3>
-            <h3>Aranžuotojas: {song.arranger}</h3>
-            {partSelector}
-          </div>
+          <Card className="text-center">
+            <Card.Header>{part.instrument}</Card.Header>
+            <Card.Body>
+              <Card.Title>{part.title}</Card.Title>
+              <Card.Text>
+                Kompozicija {part.composer} | Aranžuotė {part.arranger}
+              </Card.Text>
+            </Card.Body>
+          </Card>
           <div className="embed-responsive ">
             <embed
               className="embed-responsive-item"
-              src={song.parts[0].file}
+              src={part.file}
               width="100%"
               height="600"
             />
+          </div>
+          <div>
+            Kitos partijos
+            {filteredInstruments.map(
+              (instrument, idx) =>
+                instrument != part.instrument && (
+                  <li key={idx}>
+                    <Link href={`/songs/${songId}?part=${instrument}`}>
+                      <a>{instrument}</a>
+                    </Link>
+                  </li>
+                )
+            )}
           </div>
         </>
       ) : (
         <>
           <h1>Nėra tokios partijos...</h1>
-          {partSelector}
+          {/* {partSelector} */}
         </>
       )}
     </Container>
@@ -108,14 +71,28 @@ export async function getServerSideProps(context) {
     };
   }
 
-  const { collectiveId } = await getSongCollectiveId(context);
-  const instruments = JSON.parse(
-    await getInstruments(collectiveId)
-  ).instruments;
+  const { songId, part: partQuery } = context.query;
+  const part = JSON.parse(await getSpecificPart(songId, partQuery));
+
+  // Get all instruments for a collective
+  const instruments = JSON.parse(await getInstruments(part.collectiveId));
+
+  // Make an array of parts that exists for the instrument
+  const doesExist = await Promise.all(
+    instruments.map(async (i) => {
+      return await doesPartExistForInstrument(songId, i);
+    })
+  );
+
+  // Filter by that array
+  const filteredInstruments = instruments.filter(
+    (_v, index) => doesExist[index]
+  );
 
   return {
     props: {
-      instruments,
+      filteredInstruments,
+      part,
     },
   };
 }

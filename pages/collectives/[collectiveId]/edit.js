@@ -17,10 +17,13 @@ const EditCollective = ({ collective, collectiveId }) => {
   const [newData, setNewData] = useState({
     title: collective.title,
     logo: collective.logo,
+    color: collective.color,
   });
 
   const showSaveButton =
-    newData.title !== collective.title || newData.logo !== collective.logo;
+    newData.title !== collective.title ||
+    newData.logo !== collective.logo ||
+    newData.color !== collective.color;
 
   const submitEdit = async () => {
     // Construct the payload for updating the specific elements
@@ -40,9 +43,16 @@ const EditCollective = ({ collective, collectiveId }) => {
       };
     }
 
+    if (newData.color !== collective.color) {
+      payload = {
+        ...payload,
+        color: newData.color,
+      };
+    }
+
     axios
       .patch(`${server}/api/collectives/${collectiveId}/`, payload)
-      .then(router.replace(router.asPath))
+      .then(() => router.replace(router.asPath))
       .catch((err) => console.log(err));
   };
 
@@ -50,7 +60,7 @@ const EditCollective = ({ collective, collectiveId }) => {
     if (confirm(`Ar tikrai norite ištrinti kolektyvą: ${collective.title}?`)) {
       axios
         .delete(`${server}/api/collectives/${collectiveId}/`)
-        .then(router.replace("/"))
+        .then(() => router.replace("/"))
         .catch((err) => console.log(err));
     }
   };
@@ -97,9 +107,10 @@ const EditCollective = ({ collective, collectiveId }) => {
           <Form.Control
             type="color"
             id="collectiveColor"
-            defaultValue="#563d7c"
             title="Pasirinkite kolektyvo spalvą"
             className="mb-2 ml-2"
+            onChange={(e) => setNewData({ ...newData, color: e.target.value })}
+            value={newData.color}
           />
         </div>
         <div className="d-flex justify-content-between">
