@@ -1,9 +1,11 @@
 import Song from "../models/Song";
+import dbConnect from "../util/dbConnect";
 import { getCollectives } from "./collectiveController";
 
 //Route: /collectives/[collectiveId]/songs - POST, GET
 
 export async function getAllSongs(req) {
+  await dbConnect();
   // Get all collectives that the current user is part of
   const userCollectives = JSON.parse(await getCollectives(req.userId)).data;
   const allCollectives = userCollectives.owned.concat(userCollectives.member);
@@ -11,13 +13,24 @@ export async function getAllSongs(req) {
   const { search } = req.query;
 
   // Get songs for each collective
-  const songs = await Promise.all(
-    allCollectives.map(async (col) => ({
-      collective: col,
-      songs: JSON.parse(await searchSongs(col._id, search)),
-    }))
+
+  const result = await Promise.all(
+    allCollectives.map(async (col) => {
+      const collectiveSongs = await searchSongs(col._id, search);
+      return collectiveSongs.map((song) => ({
+        ...song,
+        collectiveId: col._id,
+        collectiveTitle: col.title,
+        collectiveLogo: col.logo,
+      }));
+    })
   );
-  return songs;
+
+  let items = [];
+  for (let index = 0; index < result.length; index++) {
+    items = items.concat(result[index]);
+  }
+  return items;
 }
 
 // Search songs
@@ -29,9 +42,7 @@ export async function searchSongs(collectiveId, search) {
         index: "default",
         text: {
           query: search,
-          path: {
-            wildcard: "*",
-          },
+          path: ["title", "composer", "arranger"],
           fuzzy: {
             maxEdits: 2,
           },
@@ -47,25 +58,11 @@ export async function searchSongs(collectiveId, search) {
     {
       $project: {
         title: 1,
+        logo: 1,
       },
     },
   ]);
-  return JSON.stringify(res);
-}
-
-export async function getPartOfSong(req) {
-  const { songId, part } = req.query;
-  const songWithPart = await Song.findOne(
-    { _id: songId, "parts.instrument": part },
-    {
-      title: 1,
-      composer: 1,
-      arranger: 1,
-      collectiveId: 1,
-      "parts.$": 1,
-    }
-  );
-  return songWithPart;
+  return res;
 }
 
 export async function getSong(songId) {
@@ -82,41 +79,9 @@ export async function getSong(songId) {
   return JSON.stringify(song);
 }
 
-export async function postSong(req) {
-  const { collectiveId } = req.query;
-  const data = { ...req.body, collectiveId };
-  const song = await Song.create(data);
-  return song.id;
-}
-
-export async function deleteSong(req) {
-  const { songId } = req.query;
-  const song = await Song.findByIdAndDelete(songId);
-  return song;
-}
-
-export async function updateSong(req) {
-  const { songId } = req.query;
-  const song = await Song.findByIdAndUpdate(songId, req.body);
-  return song;
-}
-
 export async function getSongCollectiveId(req) {
+  await dbConnect();
   const { songId } = req.query;
   const songCollectiveId = await Song.findById(songId).select("collectiveId");
   return songCollectiveId;
-}
-
-export async function getSongNamesByPart(req) {
-  const { collectiveId, instrument } = req.query;
-  const songNames = await Song.find(
-    {
-      collectiveId,
-      "parts.instrument": instrument,
-    },
-    {
-      title: 1,
-    }
-  );
-  return songNames;
 }

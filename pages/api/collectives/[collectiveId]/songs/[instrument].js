@@ -1,12 +1,22 @@
 import globalHandler from "../../../../../middleware/globalHandler";
-import {isUserCollectiveMember} from "../../../../../middleware/isUserCollectiveMember";
-import {getSongNamesByPart} from "../../../../../controllers/songController";
+import { isUserCollectiveMember } from "../../../../../middleware/isUserCollectiveMember";
+import Song from "../../../../../models/Song";
 
 const handler = globalHandler()
-    .use(isUserCollectiveMember)
-    .get(async (req, res) => {
-        const result = await getSongNamesByPart(req);
-        res.send(result);
-    })
+  .use(isUserCollectiveMember)
+  // Gets all songs that have a specific instrument part
+  .get(async (req, res) => {
+    const { collectiveId, instrument } = req.query;
+    const songNames = await Song.find(
+      {
+        collectiveId,
+        "parts.instrument": instrument,
+      },
+      {
+        title: 1,
+      }
+    );
+    res.send(songNames);
+  });
 
 export default handler;

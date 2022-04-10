@@ -1,48 +1,75 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
-import { Form, FormControl } from "react-bootstrap";
+import "react-bootstrap-typeahead/css/Typeahead.css";
+import { AsyncTypeahead } from "react-bootstrap-typeahead";
+import Image from "next/image";
 
 function Search() {
-  const [input, setInput] = useState("");
-  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [options, setOptions] = useState([]);
 
-  useEffect(() => {
-    if (input !== "" && input.length > 3) {
-      axios
-        .get(`/api/songs?search=${input}`)
-        .then((res) => setItems(res.data))
-        .catch((err) => console.log(err));
-    } else setItems([]);
-  }, [input]);
+  const handleSearch = (query) => {
+    setIsLoading(true);
+    axios
+      .get(`/api/songs?search=${query}`)
+      .then((res) => {
+        const options = res.data.map((song) => ({
+          id: song._id,
+          title: song.title,
+          collectiveTitle: song.collectiveTitle,
+          collectiveId: song.collectiveId,
+          collectiveLogo: song.collectiveLogo,
+        }));
+        setOptions(options);
+        setIsLoading(false);
+      })
+      .catch((err) => console.log(err));
+  };
 
   return (
-    <div>
-      <Form className="d-flex">
-        <FormControl
-          type="search"
-          placeholder="Paieška..."
-          className="me-2"
-          aria-label="Search"
-        />
-      </Form>
-
-      {items &&
-        items.map((item) => (
-          <div key={item.collective._id}>
-            Kolektyvas: <strong> {item.collective.title}</strong>
-            {item.songs.map((s) => (
-              <div key={s._id}>
-                <Link
-                  href={`/songs/${s._id}?collectiveId=${item.collective._id}`}
-                >
-                  {s.title}
-                </Link>
+    <AsyncTypeahead
+      id="search"
+      minLength={3}
+      isLoading={isLoading}
+      filterBy={() => true}
+      onSearch={handleSearch}
+      labelKey="title"
+      options={options}
+      placeholder="Paieška..."
+      renderMenuItemChildren={(option, props) => (
+        <Fragment>
+          <Link
+            href={`/songs/${option.id}?collectiveId=${option.collectiveId}`}
+            passHref
+          >
+            <div className="d-flex justify-content-between">
+              {option.title}
+              <div className="d-flex align-items-center">
+                <small className="mx-2"> {option.collectiveTitle}</small>
+                {option.collectiveLogo && (
+                  <Image
+                    alt="logo"
+                    src={option.collectiveLogo}
+                    width={25}
+                    height={25}
+                    className="rounded-circle"
+                  />
+                )}
               </div>
-            ))}
-          </div>
-        ))}
-    </div>
+            </div>
+          </Link>
+        </Fragment>
+      )}
+    />
+    // <Form className="d-flex">
+    //   <FormControl
+    //     type="search"
+    //     placeholder="Paieška..."
+    //     className="me-2"
+    //     aria-label="Search"
+    //   />
+    // </Form>
   );
 }
 

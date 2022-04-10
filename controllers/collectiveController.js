@@ -44,6 +44,7 @@ export async function getAllCollectives(userId) {
 
 // Gets all members for a specific collectiveId
 export async function getCollectiveMembers(collectiveId) {
+  await dbConnect();
   const members = await Collective.findById(collectiveId).select("members");
   return JSON.stringify(members);
 }
@@ -74,33 +75,4 @@ export async function getCollectiveOwner(id) {
   await dbConnect();
   const collective = await Collective.findById(id);
   return collective.owner;
-}
-
-export async function postCollective(req) {
-  const createdCollective = await Collective.create({
-    ...req.body,
-    owner: req.userId,
-    members: [],
-  });
-  return createdCollective;
-}
-
-export async function updateCollective(req) {
-  const { collectiveId } = req.query;
-  const updated = await Collective.findOneAndUpdate(
-    {
-      _id: collectiveId,
-    },
-
-    req.body
-  );
-  return updated;
-}
-
-export async function deleteCollective(req) {
-  const { collectiveId } = req.query;
-  const deleted = await Collective.findOneAndDelete({
-    _id: collectiveId,
-  });
-  return deleted;
 }

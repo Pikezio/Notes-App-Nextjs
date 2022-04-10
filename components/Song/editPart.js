@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { toBase64 } from "../../util/toBase64";
 import axios from "axios";
 import { server } from "../../util/urlConfig";
@@ -7,15 +7,16 @@ import Link from "next/link";
 import { Button, Form, ListGroup } from "react-bootstrap";
 
 function EditPart({ optionList, part, songId }) {
+  const router = useRouter();
+  const inputRef = useRef();
   const [newPartData, setNewPartData] = useState({
     instrument: part.instrument,
-    file: null,
+    filename: part.filename,
+    file: "",
   });
 
   const showSaveButton =
-    newPartData.instrument !== part.instrument || newPartData.file !== null;
-
-  const router = useRouter();
+    newPartData.instrument !== part.instrument || newPartData.file !== "";
 
   function deletePart(partId) {
     if (confirm(`Ar tikrai norite ištrinti šią partiją?`)) {
@@ -30,14 +31,18 @@ function EditPart({ optionList, part, songId }) {
 
   async function changePartFile(file) {
     const stringFile = await toBase64(file);
-    setNewPartData({ ...newPartData, file: stringFile });
+    setNewPartData({ ...newPartData, file: stringFile, filename: file.name });
   }
 
   function submitChanges(partId) {
     axios
       .patch(`${server}/api/songs/${songId}/part?partId=${partId}`, newPartData)
       .then(() => {
-        console.log("DONE");
+        setNewPartData({
+          ...newPartData,
+          file: "",
+        });
+        inputRef.current.value = "";
         router.replace(router.asPath);
       })
       .catch((err) => console.log(err));
@@ -58,6 +63,7 @@ function EditPart({ optionList, part, songId }) {
       <Form.Control
         type="file"
         size="sm"
+        ref={inputRef}
         onChange={(e) => changePartFile(e.target.files[0])}
         className="mb-2"
       />
