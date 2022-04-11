@@ -27,7 +27,8 @@ function ListOfAllCollectives({ collectives }) {
             <div className="d-flex justify-content-between">
               {collective.title}
               <Badge>
-                {collective.members[0].status === "Requested" && "Prašoma"}
+                {collective.members[0].status === "Requested" &&
+                  "Išsiųstas prašymas"}
               </Badge>
             </div>
           </ListGroup.Item>

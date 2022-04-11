@@ -1,5 +1,5 @@
 import { getSession } from "next-auth/react";
-import { Card, Container } from "react-bootstrap";
+import { Card, Container, Button } from "react-bootstrap";
 import {
   doesPartExistForInstrument,
   getSpecificPart,
@@ -8,8 +8,9 @@ import { getInstruments } from "../../../controllers/instrumentController";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import YoutubePlayer from "../../../components/youtubePlayer";
+import { isOwner } from "../../../middleware/isUserCollectiveOwner";
 
-export default function SongDetails({ part, filteredInstruments }) {
+export default function SongDetails({ part, filteredInstruments, owner }) {
   const router = useRouter();
   const { songId } = router.query;
 
@@ -24,6 +25,11 @@ export default function SongDetails({ part, filteredInstruments }) {
               <Card.Text>
                 Kompozicija {part.composer} | Aranžuotė {part.arranger}
               </Card.Text>
+              {owner && (
+                <Link passHref href={`/songs/${songId}/edit`}>
+                  <Button>Redaguoti</Button>
+                </Link>
+              )}
             </Card.Body>
           </Card>
           <div className="embed-responsive ">
@@ -74,6 +80,8 @@ export async function getServerSideProps(context) {
   const { songId, part: partQuery } = context.query;
   const part = JSON.parse(await getSpecificPart(songId, partQuery));
 
+  const owner = await isOwner(part.collectiveId, session.userId);
+
   // Get all instruments for a collective
   const instruments = JSON.parse(await getInstruments(part.collectiveId));
 
@@ -93,6 +101,7 @@ export async function getServerSideProps(context) {
     props: {
       filteredInstruments,
       part,
+      owner,
     },
   };
 }

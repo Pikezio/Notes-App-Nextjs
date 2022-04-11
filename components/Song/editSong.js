@@ -5,6 +5,8 @@ import { useRouter } from "next/router";
 import { Button, Form } from "react-bootstrap";
 
 function EditSong({ song }) {
+  const [validated, setValidated] = useState(false);
+
   const router = useRouter();
   const [newSongData, setNewSongData] = useState({
     title: song.title,
@@ -20,7 +22,17 @@ function EditSong({ song }) {
     newSongData.arranger !== song.arranger ||
     newSongData.video !== song.video;
 
-  const submitEdit = async () => {
+  const submitEdit = async (e) => {
+    const form = e.currentTarget;
+    if (form.checkValidity() === false) {
+      e.preventDefault();
+      e.stopPropagation();
+      setValidated(true);
+      return;
+    }
+
+    e.preventDefault();
+
     // Construct the payload for updating the specific elements
     let payload = {};
     if (newSongData.title !== song.title) {
@@ -51,6 +63,7 @@ function EditSong({ song }) {
       };
     }
 
+    console.log("submitted!");
     axios
       .patch(`${server}/api/songs/${songId}/`, payload)
       .then(() => router.replace(router.asPath))
@@ -67,26 +80,33 @@ function EditSong({ song }) {
   };
 
   return (
-    <Form>
-      <Form.Label>Pavadinimas</Form.Label>
-      <Form.Control
-        type="text"
-        name="title"
-        value={newSongData.title}
-        onChange={(e) =>
-          setNewSongData({ ...newSongData, title: e.target.value })
-        }
-        className="mb-2"
-      />
-
+    <Form noValidate validated={validated} onSubmit={submitEdit}>
+      <Form.Group controlId="titleControl">
+        <Form.Label>Pavadinimas</Form.Label>
+        <Form.Control
+          required
+          type="text"
+          name="title"
+          value={newSongData.title}
+          onChange={(e) => {
+            setNewSongData({ ...newSongData, title: e.target.value });
+            setValidated(false);
+          }}
+          className="mb-2"
+        />
+        <Form.Control.Feedback type="invalid">
+          Pavadinimas negali būti tuščias.
+        </Form.Control.Feedback>
+      </Form.Group>
       <Form.Label>Kompozitorius</Form.Label>
       <Form.Control
         type="text"
         name="composer"
         value={newSongData.composer}
-        onChange={(e) =>
-          setNewSongData({ ...newSongData, composer: e.target.value })
-        }
+        onChange={(e) => {
+          setNewSongData({ ...newSongData, composer: e.target.value });
+          setValidated(false);
+        }}
         className="mb-2"
       />
 
@@ -95,9 +115,10 @@ function EditSong({ song }) {
         type="text"
         name="arranger"
         value={newSongData.arranger}
-        onChange={(e) =>
-          setNewSongData({ ...newSongData, arranger: e.target.value })
-        }
+        onChange={(e) => {
+          setNewSongData({ ...newSongData, arranger: e.target.value });
+          setValidated(false);
+        }}
         className="mb-2"
       />
 
@@ -106,18 +127,14 @@ function EditSong({ song }) {
         type="text"
         name="video"
         value={newSongData.video}
-        onChange={(e) =>
-          setNewSongData({ ...newSongData, video: e.target.value })
-        }
+        onChange={(e) => {
+          setNewSongData({ ...newSongData, video: e.target.value });
+          setValidated(false);
+        }}
         className="mb-2"
       />
 
-      <Button
-        variant="success"
-        disabled={!showSaveButton}
-        onClick={submitEdit}
-        type="button"
-      >
+      <Button variant="success" disabled={!showSaveButton} type="submit">
         Išsaugoti
       </Button>
       <Button

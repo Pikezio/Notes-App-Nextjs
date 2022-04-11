@@ -90,10 +90,10 @@ function Collective({ data, collective }) {
             name="part"
             id="part"
             onChange={onInstrumentChange}
-            value={selectedInstrument ? selectedInstrument : "Nepasirinktas"}
+            value={selectedInstrument ? selectedInstrument : "Visos"}
             className="mb-2"
           >
-            <option value="Visi">Visi</option>
+            <option value="---">Visos</option>
             {collective.instruments &&
               collective.instruments.map((i, idx) => (
                 <option key={idx} value={i}>

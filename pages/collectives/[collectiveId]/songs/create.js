@@ -7,6 +7,8 @@ import axios from "axios";
 import { toBase64 } from "../../../../util/toBase64";
 
 export default function CreateSong({ owner }) {
+  const [validated, setValidated] = useState(false);
+
   const router = useRouter();
   const { collectiveId } = router.query;
 
@@ -53,10 +55,19 @@ export default function CreateSong({ owner }) {
     setParts(newParts);
   }
 
-  const submitForm = async (data) => {
+  const submitForm = async (e) => {
+    const form = e.currentTarget;
+    e.preventDefault();
+    if (form.checkValidity() === false) {
+      e.stopPropagation();
+      setValidated(true);
+      return;
+    }
+
+    const data = await constructData();
     axios
       .post(url, data)
-      .then(router.push("/"))
+      .then(() => router.push("/"))
       .catch((err) => console.log(err));
   };
 
@@ -75,21 +86,24 @@ export default function CreateSong({ owner }) {
         return item;
       })
     );
-    const fullObject = { ...songData, parts: base64parts };
-    await submitForm(fullObject);
+    return { ...songData, parts: base64parts };
   };
 
   return (
     <Container>
-      <Form>
+      <Form noValidate validated={validated} onSubmit={submitForm}>
         <Form.Group className="mb-3">
           <Form.Label>Kūrinio pavadinimas</Form.Label>
           <Form.Control
+            required
             size="lg"
             type="text"
             placeholder="Pavadinimas"
             ref={titleRef}
           />
+          <Form.Control.Feedback type="invalid">
+            Pavadinimas yra privalomas.
+          </Form.Control.Feedback>
         </Form.Group>
         <Row className="mb-3">
           <Form.Group as={Col}>
@@ -125,7 +139,7 @@ export default function CreateSong({ owner }) {
           parts={parts}
           instrumentList={instruments}
         />
-        <Button className="mt-3" onClick={constructData}>
+        <Button className="mt-3" type="submit">
           Įrašyti
         </Button>
       </Form>

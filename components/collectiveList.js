@@ -37,13 +37,15 @@ function ListOfCollectives({ owned, member }) {
                   className="d-flex align-items-center justify-content-between"
                 >
                   <div className="lead">{collective.title}</div>
-                  <Image
-                    alt="logo"
-                    width={30}
-                    height={30}
-                    src={collective.logo}
-                    rounded
-                  />
+                  {collective.logo && (
+                    <Image
+                      alt="logo"
+                      width={30}
+                      height={30}
+                      src={collective.logo}
+                      rounded
+                    />
+                  )}
                 </ListGroup.Item>
               </Link>
             ))}

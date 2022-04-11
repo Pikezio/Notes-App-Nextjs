@@ -14,6 +14,8 @@ const EditCollective = ({ collective, collectiveId }) => {
 
   const router = useRouter();
 
+  const [validated, setValidated] = useState(false);
+
   const [newData, setNewData] = useState({
     title: collective.title,
     logo: collective.logo,
@@ -25,7 +27,15 @@ const EditCollective = ({ collective, collectiveId }) => {
     newData.logo !== collective.logo ||
     newData.color !== collective.color;
 
-  const submitEdit = async () => {
+  const submitEdit = async (e) => {
+    const form = e.currentTarget;
+    e.preventDefault();
+    if (form.checkValidity() === false) {
+      e.stopPropagation();
+      setValidated(true);
+      return;
+    }
+
     // Construct the payload for updating the specific elements
     let payload = {};
     if (newData.title !== collective.title) {
@@ -67,19 +77,24 @@ const EditCollective = ({ collective, collectiveId }) => {
 
   return (
     <Container>
-      <Form>
+      <Form noValidate validated={validated} onSubmit={submitEdit}>
         <Form.Group className="d-flex justify-content-between align-items-center">
           <div>
             <Form.Label>Pavadinimas</Form.Label>
             <Form.Control
+              required
               type="text"
               name="title"
               value={newData.title}
-              onChange={(e) =>
-                setNewData({ ...newData, title: e.target.value })
-              }
+              onChange={(e) => {
+                setValidated(false);
+                setNewData({ ...newData, title: e.target.value });
+              }}
               className="mb-2"
             />
+            <Form.Control.Feedback type="invalid">
+              Pavadinimas negali būti tuščias.
+            </Form.Control.Feedback>
           </div>
           <div>
             <Form.Label>Logotipas</Form.Label>
@@ -100,7 +115,10 @@ const EditCollective = ({ collective, collectiveId }) => {
           type="file"
           name="logo"
           className="mb-2"
-          onChange={(e) => setNewData({ ...newData, logo: e.target.files[0] })}
+          onChange={(e) => {
+            setValidated(false);
+            setNewData({ ...newData, logo: e.target.files[0] });
+          }}
         />
         <div className="d-flex justify-content-between align-items-center">
           <Form.Label htmlFor="collectiveColor">Kolektyvo spalva</Form.Label>
@@ -109,7 +127,10 @@ const EditCollective = ({ collective, collectiveId }) => {
             id="collectiveColor"
             title="Pasirinkite kolektyvo spalvą"
             className="mb-2 ml-2"
-            onChange={(e) => setNewData({ ...newData, color: e.target.value })}
+            onChange={(e) => {
+              setValidated(false);
+              setNewData({ ...newData, color: e.target.value });
+            }}
             value={newData.color}
           />
         </div>
@@ -122,11 +143,7 @@ const EditCollective = ({ collective, collectiveId }) => {
           <strong>{updatedData}</strong>
         </div>
         <div className="d-flex justify-content-between justify-content-sm-start">
-          <Button
-            variant="success"
-            disabled={!showSaveButton}
-            onClick={submitEdit}
-          >
+          <Button variant="success" disabled={!showSaveButton} type="submit">
             Išsaugoti pakeitimus
           </Button>
           <Button variant="danger" className="mx-2" onClick={confirmDelete}>
