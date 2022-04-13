@@ -72,9 +72,16 @@ export async function getSong(songId) {
   return JSON.stringify(song);
 }
 
-export async function getSongCollectiveId(req) {
+export async function getSongCollectiveId(songId) {
   await dbConnect();
-  const { songId } = req.query;
   const songCollectiveId = await Song.findById(songId).select("collectiveId");
   return songCollectiveId;
+}
+
+export async function getAllCollectiveSongs(collectiveId) {
+  await dbConnect();
+  const songs = await Song.find({ collectiveId: collectiveId }).select(
+    "title composer arranger"
+  );
+  return JSON.stringify(songs);
 }

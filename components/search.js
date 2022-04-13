@@ -62,14 +62,6 @@ function Search() {
         </Fragment>
       )}
     />
-    // <Form className="d-flex">
-    //   <FormControl
-    //     type="search"
-    //     placeholder="Paieška..."
-    //     className="me-2"
-    //     aria-label="Search"
-    //   />
-    // </Form>
   );
 }
 

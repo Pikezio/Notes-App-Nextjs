@@ -1,8 +1,10 @@
 import Song from "../models/Song";
 import dbConnect from "../util/dbConnect";
+import { getSongCollectiveId } from "./songController";
 
 export async function getSpecificPart(songId, part) {
   await dbConnect();
+
   const song = await Song.findOne(
     {
       _id: songId,

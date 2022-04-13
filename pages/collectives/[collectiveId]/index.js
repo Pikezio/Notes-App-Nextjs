@@ -154,8 +154,12 @@ function Collective({ data, collective }) {
                   Redaguoti kolektyvą
                 </Button>
               </Link>
+              <Link href={`${collectiveId}/concerts`} passHref>
+                <Button variant="dark" className="mx-2 my-1">
+                  Koncertai
+                </Button>
+              </Link>
             </div>
-
             <h3>Kolektyvo nariai</h3>
             <ListGroup>
               {data.requestedUsers &&

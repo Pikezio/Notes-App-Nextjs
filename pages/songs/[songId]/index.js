@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import YoutubePlayer from "../../../components/youtubePlayer";
 import { isOwner } from "../../../middleware/isUserCollectiveOwner";
+import { getSongCollectiveId } from "../../../controllers/songController";
 
 export default function SongDetails({ part, filteredInstruments, owner }) {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
               className="embed-responsive-item"
               src={part.file}
               width="100%"
-              height="600"
+              height="375"
             />
           </div>
           <div>
@@ -58,6 +59,16 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
       ) : (
         <>
           <h1>Nėra tokios partijos...</h1>
+          <div>
+            Kitos partijos
+            {filteredInstruments.map((instrument, idx) => (
+              <li key={idx}>
+                <Link href={`/songs/${songId}?part=${instrument}`}>
+                  <a>{instrument}</a>
+                </Link>
+              </li>
+            ))}
+          </div>
         </>
       )}
     </Container>
@@ -78,7 +89,36 @@ export async function getServerSideProps(context) {
   }
 
   const { songId, part: partQuery } = context.query;
-  const part = JSON.parse(await getSpecificPart(songId, partQuery));
+  const part = partQuery
+    ? JSON.parse(await getSpecificPart(songId, partQuery))
+    : null;
+
+  if (part == null) {
+    const song = await getSongCollectiveId(songId);
+    const collectiveId = song.collectiveId;
+
+    // Get all instruments for a collective
+    const instruments = JSON.parse(await getInstruments(collectiveId));
+
+    // Make an array of parts that exists for the instrument
+    const doesExist = await Promise.all(
+      instruments.map(async (i) => {
+        return await doesPartExistForInstrument(songId, i);
+      })
+    );
+
+    // Filter by that array
+    const filteredInstruments = instruments.filter(
+      (_v, index) => doesExist[index]
+    );
+
+    return {
+      props: {
+        part: null,
+        filteredInstruments,
+      },
+    };
+  }
 
   const owner = await isOwner(part.collectiveId, session.userId);
 
