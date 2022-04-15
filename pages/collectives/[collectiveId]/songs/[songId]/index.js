@@ -1,19 +1,21 @@
 import { getSession } from "next-auth/react";
-import { Card, Container, Button } from "react-bootstrap";
+import { Card, Container, Button, Collapse } from "react-bootstrap";
 import {
   doesPartExistForInstrument,
   getSpecificPart,
-} from "../../../controllers/partController";
-import { getInstruments } from "../../../controllers/instrumentController";
+} from "../../../../../controllers/partController";
+import { getInstruments } from "../../../../../controllers/instrumentController";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import YoutubePlayer from "../../../components/youtubePlayer";
-import { isOwner } from "../../../middleware/isUserCollectiveOwner";
-import { getSongCollectiveId } from "../../../controllers/songController";
+import YoutubePlayer from "../../../../../components/youtubePlayer";
+import { isOwner } from "../../../../../middleware/isUserCollectiveOwner";
+import { useState } from "react";
 
 export default function SongDetails({ part, filteredInstruments, owner }) {
   const router = useRouter();
-  const { songId } = router.query;
+  const { songId, collectiveId } = router.query;
+  const [openVideo, setOpenVideo] = useState(false);
+  const baseUrl = `/collectives/${collectiveId}/songs`;
 
   return (
     <Container>
@@ -47,14 +49,29 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
               (instrument, idx) =>
                 instrument != part.instrument && (
                   <li key={idx}>
-                    <Link href={`/songs/${songId}?part=${instrument}`}>
+                    <Link href={`${baseUrl}/${songId}?part=${instrument}`}>
                       <a>{instrument}</a>
                     </Link>
                   </li>
                 )
             )}
           </div>
-          {part.video && <YoutubePlayer videoUrl={part.video} />}
+          {part.video && (
+            <>
+              <Button
+                onClick={() => setOpenVideo(!openVideo)}
+                aria-controls="collapse-video"
+                aria-expanded={openVideo}
+              >
+                {openVideo ? "Nerodyti video" : "Rodyti video"}
+              </Button>
+              <Collapse in={openVideo}>
+                <div id="collapse-video">
+                  <YoutubePlayer videoUrl={part.video} />
+                </div>
+              </Collapse>
+            </>
+          )}
         </>
       ) : (
         <>
@@ -63,7 +80,7 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
             Kitos partijos
             {filteredInstruments.map((instrument, idx) => (
               <li key={idx}>
-                <Link href={`/songs/${songId}?part=${instrument}`}>
+                <Link href={`${baseUrl}/${songId}?part=${instrument}`}>
                   <a>{instrument}</a>
                 </Link>
               </li>
@@ -88,15 +105,12 @@ export async function getServerSideProps(context) {
     };
   }
 
-  const { songId, part: partQuery } = context.query;
+  const { songId, part: partQuery, collectiveId } = context.query;
   const part = partQuery
     ? JSON.parse(await getSpecificPart(songId, partQuery))
     : null;
 
   if (part == null) {
-    const song = await getSongCollectiveId(songId);
-    const collectiveId = song.collectiveId;
-
     // Get all instruments for a collective
     const instruments = JSON.parse(await getInstruments(collectiveId));
 

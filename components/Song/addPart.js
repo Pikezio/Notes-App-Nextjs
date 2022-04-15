@@ -8,6 +8,7 @@ import { Button } from "react-bootstrap";
 function AddPart({ optionList, instrumentList, songId }) {
   const [parts, setParts] = useState([]);
   const router = useRouter();
+  const { collectiveId } = router.query;
 
   async function submitForm() {
     const base64parts = await Promise.all(
@@ -18,7 +19,10 @@ function AddPart({ optionList, instrumentList, songId }) {
       })
     );
     axios
-      .post(`/api/songs/${songId}/part`, base64parts)
+      .post(
+        `/api/collectives/${collectiveId}/songs/${songId}/part`,
+        base64parts
+      )
       .then(() => {
         setParts([]);
         router.push(router.asPath);

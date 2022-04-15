@@ -1,10 +1,10 @@
 import React from "react";
 import { getSession } from "next-auth/react";
-import { getSong } from "../../../controllers/songController";
-import { getInstruments } from "../../../controllers/instrumentController";
-import EditSong from "../../../components/Song/editSong";
-import EditPart from "../../../components/Song/editPart";
-import AddPart from "../../../components/Song/addPart";
+import { getSong } from "../../../../../controllers/songController";
+import { getInstruments } from "../../../../../controllers/instrumentController";
+import EditSong from "../../../../../components/Song/editSong";
+import EditPart from "../../../../../components/Song/editPart";
+import AddPart from "../../../../../components/Song/addPart";
 import { Container, ListGroup } from "react-bootstrap";
 
 function Edit({ song, instrumentList }) {

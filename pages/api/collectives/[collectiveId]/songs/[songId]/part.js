@@ -1,7 +1,7 @@
-import globalHandler from "../../../../middleware/globalHandler";
-import { attachCollectiveId } from "../../../../middleware/attachCollectiveId";
-import { isUserCollectiveOwner } from "../../../../middleware/isUserCollectiveOwner";
-import Song from "../../../../models/Song";
+import globalHandler from "../../../../../../middleware/globalHandler";
+import { attachCollectiveId } from "../../../../../../middleware/attachCollectiveId";
+import { isUserCollectiveOwner } from "../../../../../../middleware/isUserCollectiveOwner";
+import Song from "../../../../../../models/Song";
 
 const handler = globalHandler()
   .use(attachCollectiveId)

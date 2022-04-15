@@ -1,6 +1,5 @@
 import axios from "axios";
 import moment from "moment";
-import { getSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
@@ -35,9 +34,14 @@ const Concerts = ({ concerts }) => {
               className="d-flex justify-content-between align-items-center"
               key={concert._id}
             >
-              <div>
-                {concert.title} {moment(concert.date).format("LLL")}
-              </div>
+              <Link
+                passHref
+                href={`/collectives/${collectiveId}/concerts/${concert._id}`}
+              >
+                <div>
+                  {concert.title} {moment(concert.date).format("LLL")}
+                </div>
+              </Link>
               <div>
                 <Link
                   passHref
@@ -69,7 +73,7 @@ const Concerts = ({ concerts }) => {
 export default Concerts;
 
 export async function getServerSideProps(context) {
-  const redirect = await checkSession();
+  const redirect = await checkSession(context);
   if (redirect != null) return redirect;
 
   const concerts = JSON.parse(

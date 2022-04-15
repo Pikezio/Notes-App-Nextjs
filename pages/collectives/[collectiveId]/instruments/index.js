@@ -12,10 +12,7 @@ import axios from "axios";
 resetServerContext();
 
 export default function EditInstrumentList({ instruments }) {
-  let initialState;
-  instruments.instruments
-    ? (initialState = instruments.instruments)
-    : (initialState = []);
+  const initialState = instruments ? instruments : [];
 
   const [list, setList] = useState(initialState);
   const [newInstrument, setNewInstrument] = useState("");
@@ -83,7 +80,7 @@ export default function EditInstrumentList({ instruments }) {
   const submitForm = async () => {
     axios
       .post(url, list)
-      .then(router.push("/"))
+      .then(() => router.push("/"))
       .catch((err) => console.log(err));
   };
 

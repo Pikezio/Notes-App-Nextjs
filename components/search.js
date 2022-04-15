@@ -12,7 +12,7 @@ function Search() {
   const handleSearch = (query) => {
     setIsLoading(true);
     axios
-      .get(`/api/songs?search=${query}`)
+      .get(`/api/songSearch?search=${query}`)
       .then((res) => {
         const options = res.data.map((song) => ({
           id: song._id,

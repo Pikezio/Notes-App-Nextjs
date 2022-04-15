@@ -8,6 +8,8 @@ function EditSong({ song }) {
   const [validated, setValidated] = useState(false);
 
   const router = useRouter();
+  const collectiveId = router.query.collectiveId;
+
   const [newSongData, setNewSongData] = useState({
     title: song.title,
     composer: song.composer,
@@ -63,9 +65,12 @@ function EditSong({ song }) {
       };
     }
 
-    console.log("submitted!");
+    console.log(`${server}/api/collectives/${collectiveId}/songs/${songId}/`);
     axios
-      .patch(`${server}/api/songs/${songId}/`, payload)
+      .patch(
+        `${server}/api/collectives/${collectiveId}/songs/${songId}/`,
+        payload
+      )
       .then(() => router.replace(router.asPath))
       .catch((err) => console.log(err));
   };
@@ -73,7 +78,7 @@ function EditSong({ song }) {
   const confirmDelete = () => {
     if (confirm(`Ar tikrai norite ištrinti kūrinį "${song.title}"?`)) {
       axios
-        .delete(`${server}/api/songs/${songId}/`)
+        .delete(`${server}/api/collectives/${collectiveId}/songs/${songId}/`)
         .then(() => router.replace("/"))
         .catch((err) => console.log(err));
     }

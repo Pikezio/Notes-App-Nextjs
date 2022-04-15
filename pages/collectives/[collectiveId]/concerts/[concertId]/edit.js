@@ -1,29 +1,42 @@
-import React, { useRef, useState } from "react";
-import { Form, Button, Container, Col } from "react-bootstrap";
-import { useRouter } from "next/router";
 import axios from "axios";
-import { toBase64 } from "../../../../util/toBase64";
-import Image from "next/image";
-import { getAllCollectiveSongs } from "../../../../controllers/songController";
-import SetListMaker from "../../../../components/setListMaker";
 import moment from "moment";
-import { checkSession } from "../../../../middleware/checkSession";
+import { useRouter } from "next/router";
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Col, Container, Form } from "react-bootstrap";
+import SetListMaker from "../../../../../components/setListMaker";
+import { toBase64 } from "../../../../../util/toBase64";
+import Image from "next/image";
+import { checkSession } from "../../../../../middleware/checkSession";
+import { getAllCollectiveSongs } from "../../../../../controllers/songController";
+import { getConcertById } from "../../../../../controllers/concertController";
 
-export default function CreateConcert({ songs }) {
+const ConcertEdit = ({ songs, concert }) => {
   const [validated, setValidated] = useState(false);
-  const [poster, setPoster] = useState();
-  const [concertSongs, setConcertSongs] = useState([]);
+  const [concertSongs, setConcertSongs] = useState(concert.songs);
 
   const router = useRouter();
   const { collectiveId } = router.query;
 
   // Form field references
-  const titleRef = useRef();
-  const dateRef = useRef();
+  const [title, setTitle] = useState(concert.title);
+  const [date, setDate] = useState(concert.date);
+  const [poster, setPoster] = useState(concert.poster);
+
+  const different = !(
+    concert.songs.length === concertSongs.length &&
+    concert.songs.every((song, index) => song._id === concertSongs[index]._id)
+  );
+
+  // check if values have changed
+  const letSave =
+    title !== concert.title ||
+    date !== concert.date ||
+    poster !== concert.poster ||
+    different;
 
   const addSong = (song) => {
     // check if songId is already in concertSongs
-    if (!concertSongs.includes(song)) {
+    if (!concertSongs.find((s) => s._id === song._id)) {
       setConcertSongs([...concertSongs, song]);
     }
   };
@@ -51,20 +64,31 @@ export default function CreateConcert({ songs }) {
       return;
     }
 
-    const data = {
-      collectiveId: collectiveId,
-      title: titleRef.current.value,
-      date: dateRef.current.value,
-      songs: songs,
-    };
+    let data = {};
+    if (title !== concert.title) {
+      data.title = title;
+    }
 
-    if (poster != null) {
+    if (date !== concert.date) {
+      data.date = date;
+    }
+
+    if (poster != null && poster !== concert.poster) {
       data.poster = poster;
     }
 
+    if (different) {
+      data.songs = concertSongs;
+    }
+
+    console.log(data);
+
     axios
-      .post(`/api/collectives/${collectiveId}/concerts`, data)
-      .then(() => router.push(`/collectives/${collectiveId}`))
+      .patch(
+        `/api/collectives/${collectiveId}/concerts?id=${concert._id}`,
+        data
+      )
+      .then(() => router.push(`/collectives/${collectiveId}/concerts`))
       .catch((err) => console.log(err));
   };
 
@@ -78,7 +102,8 @@ export default function CreateConcert({ songs }) {
             size="lg"
             type="text"
             placeholder="Pavadinimas"
-            ref={titleRef}
+            onChange={(e) => setTitle(e.target.value)}
+            defaultValue={concert.title}
           />
           <Form.Control.Feedback type="invalid">
             Pavadinimas yra privalomas.
@@ -91,7 +116,8 @@ export default function CreateConcert({ songs }) {
             min={moment(new Date()).format("YYYY-MM-DDTHH:mm")}
             type="datetime-local"
             placeholder="Data"
-            ref={dateRef}
+            onChange={(e) => setDate(e.target.value)}
+            defaultValue={moment(concert.date).format("YYYY-MM-DDTHH:mm")}
           />
         </Form.Group>
         <Form.Group>
@@ -101,9 +127,9 @@ export default function CreateConcert({ songs }) {
             placeholder="Skelbimas"
             onChange={async (e) => setPoster(await toBase64(e.target.files[0]))}
           />
-          {poster && (
+          {concert.poster && (
             <Image
-              src={poster}
+              src={poster ? poster : concert.poster}
               alt="poster"
               width="100%"
               height="100%"
@@ -121,26 +147,34 @@ export default function CreateConcert({ songs }) {
           handleOnDragEnd={handleOnDragEnd}
         />
 
-        <Button className="mt-3" variant="success" type="submit">
-          Sukurti
+        <Button
+          disabled={!letSave}
+          className="mt-3"
+          variant="success"
+          type="submit"
+        >
+          Išsaugoti pakeitimus
         </Button>
       </Form>
     </Container>
   );
-}
+};
 
-CreateConcert.auth = true;
+export default ConcertEdit;
 
 export async function getServerSideProps(context) {
   const hasSession = await checkSession(context);
   if (hasSession != null) return hasSession;
 
-  const { collectiveId } = context.query;
+  const { collectiveId, concertId } = context.query;
+
+  const concert = JSON.parse(await getConcertById(concertId));
   const songs = JSON.parse(await getAllCollectiveSongs(collectiveId));
 
   return {
     props: {
       songs,
+      concert,
     },
   };
 }

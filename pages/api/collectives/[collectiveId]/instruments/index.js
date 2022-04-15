@@ -1,7 +1,7 @@
-import globalHandler from "../../../../middleware/globalHandler";
-import { isUserCollectiveOwner } from "../../../../middleware/isUserCollectiveOwner";
-import { isUserCollectiveMember } from "../../../../middleware/isUserCollectiveMember";
-import Collective from "../../../../models/Collective";
+import globalHandler from "../../../../../middleware/globalHandler";
+import { isUserCollectiveOwner } from "../../../../../middleware/isUserCollectiveOwner";
+import { isUserCollectiveMember } from "../../../../../middleware/isUserCollectiveMember";
+import Collective from "../../../../../models/Collective";
 
 const handler = globalHandler()
   .use(isUserCollectiveMember)

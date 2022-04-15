@@ -8,6 +8,7 @@ import { Button, Form, ListGroup } from "react-bootstrap";
 
 function EditPart({ optionList, part, songId }) {
   const router = useRouter();
+  const collectiveId = router.query.collectiveId;
   const inputRef = useRef();
   const [newPartData, setNewPartData] = useState({
     instrument: part.instrument,
@@ -21,7 +22,9 @@ function EditPart({ optionList, part, songId }) {
   function deletePart(partId) {
     if (confirm(`Ar tikrai norite ištrinti šią partiją?`)) {
       axios
-        .delete(`${server}/api/songs/${songId}/part?partId=${partId}`)
+        .delete(
+          `${server}/api/collectives/${collectiveId}/songs/${songId}/part?partId=${partId}`
+        )
         .then(() => {
           router.replace(router.asPath);
         })
@@ -36,7 +39,10 @@ function EditPart({ optionList, part, songId }) {
 
   function submitChanges(partId) {
     axios
-      .patch(`${server}/api/songs/${songId}/part?partId=${partId}`, newPartData)
+      .patch(
+        `${server}/api/collectives/${collectiveId}/songs/${songId}/part?partId=${partId}`,
+        newPartData
+      )
       .then(() => {
         setNewPartData({
           ...newPartData,
@@ -50,7 +56,11 @@ function EditPart({ optionList, part, songId }) {
 
   return (
     <ListGroup.Item>
-      <Link href={`/songs/${songId}?part=${part.instrument}`}>Peržiūrėti</Link>
+      <Link
+        href={`/collectives/${collectiveId}/songs/${songId}?part=${part.instrument}`}
+      >
+        Peržiūrėti
+      </Link>
       <Form.Select
         value={newPartData.instrument}
         onChange={(e) =>

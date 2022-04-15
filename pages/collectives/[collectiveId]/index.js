@@ -33,7 +33,9 @@ function Collective({ data, collective }) {
   // Refetch when instrument changes
   useEffect(() => {
     axios
-      .get(`/api/collectives/${collectiveId}/songs/${selectedInstrument}`)
+      .get(
+        `/api/collectives/${collectiveId}/songs?instrument=${selectedInstrument}`
+      )
       .then((res) => setSongs(res.data))
       .catch((err) => console.log(err));
   }, [selectedInstrument, collectiveId]);
@@ -61,6 +63,8 @@ function Collective({ data, collective }) {
     setSelectedInstrument(e.target.value);
     localStorage.setItem(collectiveId, e.target.value);
   };
+
+  const urlBase = `/collectives/${collectiveId}/songs`;
 
   if (data.member || data.owner) {
     return (
@@ -124,11 +128,11 @@ function Collective({ data, collective }) {
                   key={s._id}
                   className="d-flex justify-content-between align-items-center"
                 >
-                  <Link href={`/songs/${s._id}?part=${selectedInstrument}`}>
+                  <Link href={`${urlBase}/${s._id}?part=${selectedInstrument}`}>
                     <a>{s.title}</a>
                   </Link>
                   {data.owner && (
-                    <Link href={`/songs/${s._id}/edit`} passHref>
+                    <Link href={`${urlBase}/${s._id}/edit`} passHref>
                       <Button>Redaguoti</Button>
                     </Link>
                   )}

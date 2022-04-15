@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Draggable } from "react-beautiful-dnd";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
-import { Button, Form, ListGroup, Modal } from "react-bootstrap";
+import { Badge, Button, Form, ListGroup, Modal } from "react-bootstrap";
 
 const SetListMaker = ({
   songs,
@@ -16,22 +16,24 @@ const SetListMaker = ({
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const filterList = () => {
-    if (filter === "") {
-      return songs;
-    }
-    return songs.filter((song) => {
-      return song.title.toLowerCase().includes(filter.toLowerCase());
-    });
-  };
+  const notAddedSongs = songs.filter(
+    (song) => !concertSongs.find((s) => s._id === song._id)
+  );
+
+  const filterList =
+    filter != ""
+      ? notAddedSongs.filter((song) => {
+          return song.title.toLowerCase().includes(filter.toLowerCase());
+        })
+      : notAddedSongs;
 
   return (
     <div className="mt-3">
       <h4>Koncerto Programa</h4>
-      <Button onClick={handleShow}>Pridėti dainą</Button>
+      <Button onClick={handleShow}>Pridėti kūrinį</Button>
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Pridėti dainą</Modal.Title>
+          <Modal.Title>Pridėti kūrinį</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group className="mb-2">
@@ -42,32 +44,36 @@ const SetListMaker = ({
             />
           </Form.Group>
           <ListGroup>
-            {songs &&
-              filterList().map(
-                (song) =>
-                  !concertSongs.includes(song) && (
-                    <ListGroup.Item
-                      action
-                      key={song._id}
-                      onClick={() => addSong(song)}
-                    >
-                      <div className="d-flex justify-content-between">
-                        {song.title}
-                        <div>
-                          <small>
-                            <strong>Ar. </strong>
-                            {song.composer}
-                          </small>
-                          <br />
-                          <small>
-                            <strong>Komp. </strong>
-                            {song.arranger}
-                          </small>
-                        </div>
-                      </div>
-                    </ListGroup.Item>
-                  )
-              )}
+            {filterList && filterList.length > 0 ? (
+              filterList.map((song) => (
+                <ListGroup.Item
+                  action
+                  key={song._id}
+                  onClick={() => addSong(song)}
+                >
+                  <div className="d-flex justify-content-between">
+                    {song.title}
+                    <div>
+                      <small>
+                        <strong>Ar. </strong>
+                        {song.composer}
+                      </small>
+                      <br />
+                      <small>
+                        <strong>Komp. </strong>
+                        {song.arranger}
+                      </small>
+                    </div>
+                  </div>
+                </ListGroup.Item>
+              ))
+            ) : (
+              <ListGroup.Item>
+                <Badge pill bg="danger">
+                  Visi kūriniai pridėti
+                </Badge>
+              </ListGroup.Item>
+            )}
           </ListGroup>
         </Modal.Body>
       </Modal>

@@ -15,7 +15,14 @@ const ConcertSchema = new mongoose.Schema(
       required: true,
     },
     poster: String,
-    songs: [String],
+    songs: [
+      {
+        _id: String,
+        title: String,
+        composer: String,
+        arranger: String,
+      },
+    ],
   },
   {
     timestamps: true,
