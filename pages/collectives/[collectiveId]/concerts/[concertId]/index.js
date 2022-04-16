@@ -1,5 +1,4 @@
 import moment from "moment";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
@@ -12,15 +11,14 @@ const ConcertDetails = ({ concert }) => {
   return (
     <Container>
       <Card className="text-center">
-        <Card.Header></Card.Header>
+        <Card.Header>{moment(concert.date).format("LLL")}</Card.Header>
         <Card.Body>
           <Card.Title>{concert.title}</Card.Title>
-
-          {concert.poster && <Card.Img variant="top" src={concert.poster} />}
+          <div style={{ width: "500px" }}>
+            {concert.poster && <Card.Img variant="top" src={concert.poster} />}
+          </div>
         </Card.Body>
-        <Card.Footer className="text-muted">
-          {moment(concert.date).format("LLL")}
-        </Card.Footer>
+        <Card.Footer className="text-muted">Koncerto programa</Card.Footer>
         <ListGroup className="list-group-flush">
           {concert.songs &&
             concert.songs.map((song) => (
@@ -29,7 +27,10 @@ const ConcertDetails = ({ concert }) => {
                 passHref
                 href={`/collectives/${collectiveId}/songs/${song._id}?part=all`}
               >
-                <ListGroupItem action>
+                <ListGroupItem
+                  action
+                  className="d-flex justify-content-between align-items-start"
+                >
                   {song.title} | {song.composer} | {song.arranger}
                 </ListGroupItem>
               </Link>

@@ -55,7 +55,7 @@ export default function CreateConcert({ songs }) {
       collectiveId: collectiveId,
       title: titleRef.current.value,
       date: dateRef.current.value,
-      songs: songs,
+      songs: concertSongs,
     };
 
     if (poster != null) {

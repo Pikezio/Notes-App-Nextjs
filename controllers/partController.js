@@ -31,6 +31,7 @@ export async function getSpecificPart(songId, part) {
     composer: data[0].composer,
     arranger: data[0].arranger,
     instrument: data[0].parts.instrument,
+    video: data[0].video,
     parts,
   });
 }

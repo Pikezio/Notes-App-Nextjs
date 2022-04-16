@@ -16,8 +16,9 @@ function ListOfCollectives({ owned, member }) {
 
   return (
     <Container>
-      <Row>
-        <Col xs={12} md={6}>
+      <h1>Kolektyvai</h1>
+      <Row xs={1} md={2} className="g-4">
+        <Col>
           <Card className="mb-2">
             <Card.Header>
               <div className="d-flex justify-content-between align-items-center">
@@ -43,6 +44,7 @@ function ListOfCollectives({ owned, member }) {
                     href={`/collectives/${collective._id}`}
                   >
                     <ListGroup.Item
+                      action
                       role="button"
                       className="d-flex align-items-center justify-content-between"
                     >
@@ -91,6 +93,7 @@ function ListOfCollectives({ owned, member }) {
                     href={`/collectives/${collective._id}`}
                   >
                     <ListGroup.Item
+                      action
                       role="button"
                       className="d-flex align-items-center justify-content-between"
                     >
