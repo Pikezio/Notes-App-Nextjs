@@ -44,7 +44,10 @@ function Collective({ data, collective }) {
   useEffect(() => {
     const getSavedInstrument = async () => {
       if (router.isReady && collectiveId) {
-        setSelectedInstrument(localStorage.getItem(collectiveId));
+        const item = localStorage.getItem(collectiveId);
+        if (item != null) {
+          setSelectedInstrument(item);
+        }
       }
     };
     getSavedInstrument();
@@ -94,10 +97,14 @@ function Collective({ data, collective }) {
             name="part"
             id="part"
             onChange={onInstrumentChange}
-            value={selectedInstrument ? selectedInstrument : "Visos"}
+            value={
+              collective.instruments.includes(selectedInstrument)
+                ? selectedInstrument
+                : "Visos"
+            }
             className="mb-2"
           >
-            <option value="---">Visos</option>
+            <option value="all">Visos</option>
             {collective.instruments &&
               collective.instruments.map((i, idx) => (
                 <option key={idx} value={i}>

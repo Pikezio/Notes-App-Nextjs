@@ -1,11 +1,11 @@
 import React from "react";
-import { getSession } from "next-auth/react";
 import { getSong } from "../../../../../controllers/songController";
 import { getInstruments } from "../../../../../controllers/instrumentController";
 import EditSong from "../../../../../components/Song/editSong";
 import EditPart from "../../../../../components/Song/editPart";
 import AddPart from "../../../../../components/Song/addPart";
 import { Container, ListGroup } from "react-bootstrap";
+import { checkSession } from "../../../../../middleware/checkSession";
 
 function Edit({ song, instrumentList }) {
   const dashes = (
@@ -38,11 +38,7 @@ function Edit({ song, instrumentList }) {
             />
           ))}
       </ListGroup>
-      <AddPart
-        optionList={optionList}
-        instrumentList={instrumentList}
-        songId={song._id}
-      />
+      <AddPart instrumentList={instrumentList} songId={song._id} />
     </Container>
   );
 }
@@ -50,15 +46,9 @@ function Edit({ song, instrumentList }) {
 export default Edit;
 
 export async function getServerSideProps(context) {
-  const session = await getSession(context);
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
+  const hasSession = await checkSession(context);
+  if (hasSession != null) return hasSession;
+
   const song = JSON.parse(await getSong(context.query.songId));
   const instrumentList = JSON.parse(await getInstruments(song.collectiveId));
   return {

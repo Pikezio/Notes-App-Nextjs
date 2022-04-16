@@ -14,7 +14,7 @@ const handler = globalHandler()
   // Gets a list of songs that have a particular instrument
   .get(async (req, res) => {
     const { collectiveId, instrument } = req.query;
-    if (instrument === "---") {
+    if (instrument === "all" || instrument === "---" || instrument == null) {
       // Return all song titles
       const songs = await Song.find(
         { collectiveId: collectiveId },

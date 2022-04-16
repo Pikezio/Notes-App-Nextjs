@@ -1,8 +1,9 @@
+import moment from "moment";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
-import { Container } from "react-bootstrap";
+import { Card, Container, ListGroup, ListGroupItem } from "react-bootstrap";
 import { getConcertById } from "../../../../../controllers/concertController";
 
 const ConcertDetails = ({ concert }) => {
@@ -10,22 +11,31 @@ const ConcertDetails = ({ concert }) => {
   const { collectiveId } = router.query;
   return (
     <Container>
-      <h1>Koncertas:{concert.title}</h1>
-      <h1>Data: {concert.date}</h1>
-      {concert.poster && (
-        <Image alt="poster" src={concert.poster} width={250} height={125} />
-      )}
-      <h1>Song ids:</h1>
-      {concert.songs &&
-        concert.songs.map((song) => (
-          <Link
-            key={song._id}
-            passHref
-            href={`/collectives/${collectiveId}/songs/${song._id}`}
-          >
-            <p>{song.title}</p>
-          </Link>
-        ))}
+      <Card className="text-center">
+        <Card.Header></Card.Header>
+        <Card.Body>
+          <Card.Title>{concert.title}</Card.Title>
+
+          {concert.poster && <Card.Img variant="top" src={concert.poster} />}
+        </Card.Body>
+        <Card.Footer className="text-muted">
+          {moment(concert.date).format("LLL")}
+        </Card.Footer>
+        <ListGroup className="list-group-flush">
+          {concert.songs &&
+            concert.songs.map((song) => (
+              <Link
+                key={song._id}
+                passHref
+                href={`/collectives/${collectiveId}/songs/${song._id}?part=all`}
+              >
+                <ListGroupItem action>
+                  {song.title} | {song.composer} | {song.arranger}
+                </ListGroupItem>
+              </Link>
+            ))}
+        </ListGroup>
+      </Card>
     </Container>
   );
 };

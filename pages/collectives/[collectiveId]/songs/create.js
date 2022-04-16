@@ -4,9 +4,8 @@ import FileUpload from "../../../../components/files/fileUpload";
 import { useRouter } from "next/router";
 import { server } from "../../../../util/urlConfig";
 import axios from "axios";
-import { toBase64 } from "../../../../util/toBase64";
 
-export default function CreateSong({ owner }) {
+export default function CreateSong() {
   const [validated, setValidated] = useState(false);
 
   const router = useRouter();
@@ -17,6 +16,7 @@ export default function CreateSong({ owner }) {
   const composerRef = useRef();
   const arrangerRef = useRef();
   const videoRef = useRef();
+  const submitButton = useRef();
 
   const [parts, setParts] = useState([]);
   const [instruments, setInstruments] = useState([]);
@@ -35,25 +35,10 @@ export default function CreateSong({ owner }) {
     }
   }, [collectiveId]);
 
-  // Updates state, when files change
-  function handleFileChange(e) {
-    let newState = Array.from(e.target.files).map((file) => {
-      return {
-        file: file,
-        filename: file.name,
-        instrument: "undefined",
-      };
-    });
-    setParts(newState);
-  }
-
-  // Updates state, when instruments are selected
-  function handleDropDownChange(e, partId) {
-    const selectedInstrument = e.target.value;
-    let newParts = [...parts];
-    newParts[partId].instrument = selectedInstrument;
-    setParts(newParts);
-  }
+  const returnParts = async (parts) => {
+    setParts(parts);
+    submitButton.current.click();
+  };
 
   const submitForm = async (e) => {
     const form = e.currentTarget;
@@ -64,29 +49,22 @@ export default function CreateSong({ owner }) {
       return;
     }
 
-    const data = await constructData();
-    axios
-      .post(url, data)
-      .then(() => router.push("/"))
-      .catch((err) => console.log(err));
+    sendData();
   };
 
-  const constructData = async () => {
-    const songData = {
+  const sendData = async () => {
+    const data = {
       title: titleRef.current.value,
       composer: composerRef.current.value,
       arranger: arrangerRef.current.value,
       video: videoRef.current.value,
+      parts: parts,
     };
 
-    const base64parts = await Promise.all(
-      parts.map(async (item) => {
-        const base64 = await toBase64(item.file);
-        item.file = base64;
-        return item;
-      })
-    );
-    return { ...songData, parts: base64parts };
+    axios
+      .post(url, data)
+      .then(() => router.push("/"))
+      .catch((err) => console.log(err));
   };
 
   return (
@@ -134,14 +112,11 @@ export default function CreateSong({ owner }) {
         </Form.Group>
 
         <FileUpload
-          handleDropDownChange={handleDropDownChange}
-          handleFileChange={handleFileChange}
-          parts={parts}
           instrumentList={instruments}
+          returnParts={returnParts}
+          buttonText="Sukurti"
         />
-        <Button className="mt-3" type="submit">
-          Įrašyti
-        </Button>
+        <Button hidden type="submit" ref={submitButton}></Button>
       </Form>
     </Container>
   );

@@ -7,6 +7,7 @@ import {
   Navbar as BNavbar,
   NavItem,
   Button,
+  NavDropdown,
 } from "react-bootstrap";
 
 export default function Navbar() {
@@ -19,38 +20,53 @@ export default function Navbar() {
           <BNavbar.Brand>🎵 NotesApp</BNavbar.Brand>
         </Link>
         <BNavbar.Toggle aria-controls="navbar" />
-        <BNavbar.Collapse id="navbar">
-          <Nav
-            className="me-auto my-2 my-lg-0"
-            style={{ maxHeight: "200px" }}
-            navbarScroll
-          >
-            {session ? (
-              <>
+        {session ? (
+          <>
+            <BNavbar.Collapse id="navbar">
+              <Nav
+                className="me-auto my-2 my-lg-0"
+                style={{ maxHeight: "200px" }}
+                navbarScroll
+              >
                 <NavItem>
                   <Link href="/" passHref>
                     <Nav.Link>Pagrindinis</Nav.Link>
                   </Link>
                 </NavItem>
 
-                <Link href="/collectives/all" passHref>
-                  <Nav.Link>Visi kolektyvai</Nav.Link>
-                </Link>
-                <Link href="/collectives/create" passHref>
-                  <Nav.Link>Sukurti kolektyvą</Nav.Link>
-                </Link>
-                <Link href="/collectives/create" passHref>
-                  <Nav.Link onClick={() => signOut}>Atsijungti</Nav.Link>
-                </Link>
-              </>
-            ) : (
-              <Button variant="light" onClick={() => signIn}>
-                Prisijungti
-              </Button>
-            )}
-          </Nav>
-          <Search />
-        </BNavbar.Collapse>
+                <Search />
+              </Nav>
+            </BNavbar.Collapse>
+            <BNavbar.Collapse className="justify-content-end">
+              <Nav>
+                <NavDropdown
+                  title={`Prisijungta: ${session.user.name}`}
+                  id="nav-dropdown"
+                >
+                  <NavDropdown.Item>
+                    <Link href="/collectives/create" passHref>
+                      Sukurti kolektyvą
+                    </Link>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item>
+                    <Link href="/collectives/all" passHref>
+                      Visi kolektyvai
+                    </Link>
+                  </NavDropdown.Item>
+
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item onClick={() => signOut()}>
+                    Atsijungti
+                  </NavDropdown.Item>
+                </NavDropdown>
+              </Nav>
+            </BNavbar.Collapse>
+          </>
+        ) : (
+          <Button variant="light" onClick={() => signIn()}>
+            Prisijungti
+          </Button>
+        )}
       </Container>
     </BNavbar>
   );

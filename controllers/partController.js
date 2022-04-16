@@ -1,37 +1,38 @@
+import { ObjectId } from "mongodb";
 import Song from "../models/Song";
 import dbConnect from "../util/dbConnect";
-import { getSongCollectiveId } from "./songController";
 
 export async function getSpecificPart(songId, part) {
   await dbConnect();
 
-  const song = await Song.findOne(
+  if (part === "all" || part === "---" || part == null) {
+    const song = await Song.findById(songId).select(
+      "_id title composer arranger parts"
+    );
+    return JSON.stringify(song);
+  }
+
+  const data = await Song.aggregate([
     {
-      _id: songId,
-      "parts.instrument": part,
+      $match: { _id: new ObjectId(songId) },
     },
-    {
-      title: 1,
-      composer: 1,
-      arranger: 1,
-      collectiveId: 1,
-      video: 1,
-      "parts.$": 1,
-    }
-  );
-  if (song) {
-    return JSON.stringify({
-      _id: song._id,
-      title: song.title,
-      composer: song.composer,
-      arranger: song.arranger,
-      video: song.video,
-      instrument: song.parts[0].instrument,
-      filename: song.parts[0].filename,
-      file: song.parts[0].file,
-      collectiveId: song.collectiveId,
-    });
-  } else return null;
+    { $unwind: "$parts" },
+    { $match: { "parts.instrument": part } },
+  ]);
+
+  const parts = data.map((part) => ({
+    filename: part.parts.filename,
+    file: part.parts.file,
+  }));
+
+  return JSON.stringify({
+    _id: songId,
+    title: data[0].title,
+    composer: data[0].composer,
+    arranger: data[0].arranger,
+    instrument: data[0].parts.instrument,
+    parts,
+  });
 }
 
 // get all parts that have a file in the specified song

@@ -46,7 +46,7 @@ export default function EditInstrumentList({ instruments }) {
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                     ref={provided.innerRef}
-                    className="d-flex justify-content-between"
+                    className="d-flex justify-content-between align-items-center"
                   >
                     {i}
                     <Button
@@ -78,10 +78,12 @@ export default function EditInstrumentList({ instruments }) {
 
   const url = `${server}/api/collectives/${collectiveId}/instruments`;
   const submitForm = async () => {
-    axios
-      .post(url, list)
-      .then(() => router.push("/"))
-      .catch((err) => console.log(err));
+    if (confirm("Ar tikrai norite išsaugoti pakeitimus?")) {
+      axios
+        .post(url, list)
+        .then(() => router.push("/"))
+        .catch((err) => console.log(err));
+    }
   };
 
   return (

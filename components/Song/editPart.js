@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { toBase64 } from "../../util/toBase64";
 import axios from "axios";
 import { server } from "../../util/urlConfig";
@@ -8,16 +8,12 @@ import { Button, Form, ListGroup } from "react-bootstrap";
 
 function EditPart({ optionList, part, songId }) {
   const router = useRouter();
-  const collectiveId = router.query.collectiveId;
-  const inputRef = useRef();
-  const [newPartData, setNewPartData] = useState({
-    instrument: part.instrument,
-    filename: part.filename,
-    file: "",
-  });
+  const { collectiveId } = router.query;
 
-  const showSaveButton =
-    newPartData.instrument !== part.instrument || newPartData.file !== "";
+  const [partFile, setPartFile] = useState(null);
+  const [instrument, setInstrument] = useState(part.instrument);
+
+  const showSaveButton = instrument !== part.instrument || partFile != null;
 
   function deletePart(partId) {
     if (confirm(`Ar tikrai norite ištrinti šią partiją?`)) {
@@ -25,47 +21,41 @@ function EditPart({ optionList, part, songId }) {
         .delete(
           `${server}/api/collectives/${collectiveId}/songs/${songId}/part?partId=${partId}`
         )
-        .then(() => {
-          router.replace(router.asPath);
-        })
+        .then(() => router.replace(router.asPath))
         .catch((err) => console.log(err));
     }
   }
 
-  async function changePartFile(file) {
-    const stringFile = await toBase64(file);
-    setNewPartData({ ...newPartData, file: stringFile, filename: file.name });
-  }
+  async function submitChanges(partId) {
+    let data = {};
+    if (partFile != null) {
+      data.filename = partFile.name;
+      data.file = await toBase64(partFile);
+    }
 
-  function submitChanges(partId) {
+    if (instrument !== part.instrument) {
+      data.instrument = instrument;
+    }
+
     axios
       .patch(
         `${server}/api/collectives/${collectiveId}/songs/${songId}/part?partId=${partId}`,
-        newPartData
+        data
       )
-      .then(() => {
-        setNewPartData({
-          ...newPartData,
-          file: "",
-        });
-        inputRef.current.value = "";
-        router.replace(router.asPath);
-      })
+      .then(() => router.replace(router.asPath))
       .catch((err) => console.log(err));
   }
 
   return (
-    <ListGroup.Item>
+    <ListGroup.Item className="d-flex align-items-center justify-content-between">
       <Link
         href={`/collectives/${collectiveId}/songs/${songId}?part=${part.instrument}`}
       >
         Peržiūrėti
       </Link>
       <Form.Select
-        value={newPartData.instrument}
-        onChange={(e) =>
-          setNewPartData({ ...newPartData, instrument: e.target.value })
-        }
+        value={instrument}
+        onChange={(e) => setInstrument(e.target.value)}
       >
         {optionList}
       </Form.Select>
@@ -73,9 +63,7 @@ function EditPart({ optionList, part, songId }) {
       <Form.Control
         type="file"
         size="sm"
-        ref={inputRef}
-        onChange={(e) => changePartFile(e.target.files[0])}
-        className="mb-2"
+        onChange={(e) => setPartFile(e.target.files[0])}
       />
       <Button
         disabled={!showSaveButton}

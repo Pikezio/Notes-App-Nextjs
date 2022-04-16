@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useRef, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import "react-bootstrap-typeahead/css/Typeahead.css";
@@ -8,6 +8,8 @@ import Image from "next/image";
 function Search() {
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState([]);
+
+  const inputRef = useRef();
 
   const handleSearch = (query) => {
     setIsLoading(true);
@@ -37,10 +39,11 @@ function Search() {
       labelKey="title"
       options={options}
       placeholder="Paieška..."
-      renderMenuItemChildren={(option, props) => (
+      ref={inputRef}
+      renderMenuItemChildren={(option) => (
         <Fragment>
           <Link
-            href={`/songs/${option.id}?collectiveId=${option.collectiveId}`}
+            href={`/collectives/${option.collectiveId}/songs/${option.id}?part=all`}
             passHref
           >
             <div className="d-flex justify-content-between">
