@@ -30,18 +30,12 @@ function Collective({ data, collective }) {
     useRecoilState(instrumentState);
   const [sort, setSort] = useState(false);
 
+  // // Get instrument from local storage
+  // useEffect(() => {}, []);
+
   // Refetch when instrument changes
   useEffect(() => {
-    axios
-      .get(
-        `/api/collectives/${collectiveId}/songs?instrument=${selectedInstrument}`
-      )
-      .then((res) => setSongs(res.data))
-      .catch((err) => console.log(err));
-  }, [selectedInstrument, collectiveId]);
-
-  // Get instrument from local storage
-  useEffect(() => {
+    console.log("Fetched");
     const getSavedInstrument = async () => {
       if (router.isReady && collectiveId) {
         const item = localStorage.getItem(collectiveId);
@@ -51,7 +45,13 @@ function Collective({ data, collective }) {
       }
     };
     getSavedInstrument();
-  }, [router.isReady, collectiveId, setSelectedInstrument]);
+    axios
+      .get(
+        `/api/collectives/${collectiveId}/songs?instrument=${selectedInstrument}`
+      )
+      .then((res) => setSongs(res.data))
+      .catch((err) => console.log(err));
+  }, [selectedInstrument, collectiveId, router.isReady, setSelectedInstrument]);
 
   const modifyUser = async (_id, action) => {
     await axios.post(`${server}/api/collectives/${collectiveId}/user`, {

@@ -4,13 +4,32 @@ import { getCollectives } from "./collectiveController";
 
 //Route: /collectives/[collectiveId]/songs - POST, GET
 
-export async function getAllSongs(req) {
+async function getAllUserCollectives(userId) {
   await dbConnect();
   // Get all collectives that the current user is part of
-  const userCollectives = JSON.parse(await getCollectives(req.userId)).data;
-  const allCollectives = userCollectives.owned.concat(userCollectives.member);
+  const userCollectives = JSON.parse(await getCollectives(userId)).data;
+  return userCollectives.owned.concat(userCollectives.member);
+}
 
+export async function getAllUserSongs(userId) {
+  await dbConnect();
+  const allCollectives = await getAllUserCollectives(userId);
+  const result = await Promise.all(
+    allCollectives.map(async (collective) => {
+      return JSON.parse(await getAllCollectiveSongs(collective._id));
+    })
+  );
+  let items = [];
+  for (let index = 0; index < result.length; index++) {
+    items = items.concat(result[index]);
+  }
+  return JSON.stringify(items);
+}
+
+export async function getAllSongs(req) {
+  await dbConnect();
   const { search } = req.query;
+  const allCollectives = await getAllUserCollectives(req.userId);
 
   // Get songs for each collective
 
@@ -36,20 +55,18 @@ export async function getAllSongs(req) {
 // Search songs
 export async function searchSongs(collectiveId, search) {
   if (search === undefined) return {};
-  const res = await Song.aggregate([
+
+  const pipeline = [
     {
       $search: {
-        index: "default",
-        text: {
+        index: "autocompleteSongs",
+        autocomplete: {
           query: search,
-          path: ["title", "composer", "arranger"],
-          fuzzy: {
-            maxEdits: 2,
-          },
+          path: "title",
+          tokenOrder: "sequential",
         },
       },
     },
-    { $limit: 6 },
     {
       $match: {
         collectiveId: collectiveId,
@@ -61,7 +78,10 @@ export async function searchSongs(collectiveId, search) {
         logo: 1,
       },
     },
-  ]);
+    { $limit: 6 },
+  ];
+
+  const res = await Song.aggregate(pipeline);
   return res;
 }
 
@@ -81,7 +101,7 @@ export async function getSongCollectiveId(songId) {
 export async function getAllCollectiveSongs(collectiveId) {
   await dbConnect();
   const songs = await Song.find({ collectiveId: collectiveId }).select(
-    "title composer arranger"
+    "title composer arranger collectiveId"
   );
   return JSON.stringify(songs);
 }

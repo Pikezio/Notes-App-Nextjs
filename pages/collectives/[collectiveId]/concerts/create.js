@@ -138,6 +138,8 @@ export async function getServerSideProps(context) {
   const { collectiveId } = context.query;
   const songs = JSON.parse(await getAllCollectiveSongs(collectiveId));
 
+  console.log(songs);
+
   return {
     props: {
       songs,

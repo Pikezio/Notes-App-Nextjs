@@ -9,9 +9,11 @@ import {
   Button,
   NavDropdown,
 } from "react-bootstrap";
+import { useRouter } from "next/router";
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const router = useRouter();
 
   return (
     <BNavbar expand="lg">
@@ -33,7 +35,11 @@ export default function Navbar() {
                     <Nav.Link>Pagrindinis</Nav.Link>
                   </Link>
                 </NavItem>
-
+                <NavItem>
+                  <Link href="/songs" passHref>
+                    <Nav.Link>Kūrinių Biblioteka</Nav.Link>
+                  </Link>
+                </NavItem>
                 <Search />
               </Nav>
             </BNavbar.Collapse>
