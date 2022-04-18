@@ -30,12 +30,8 @@ function Collective({ data, collective }) {
     useRecoilState(instrumentState);
   const [sort, setSort] = useState(false);
 
-  // // Get instrument from local storage
-  // useEffect(() => {}, []);
-
   // Refetch when instrument changes
   useEffect(() => {
-    console.log("Fetched");
     const getSavedInstrument = async () => {
       if (router.isReady && collectiveId) {
         const item = localStorage.getItem(collectiveId);
@@ -53,13 +49,22 @@ function Collective({ data, collective }) {
       .catch((err) => console.log(err));
   }, [selectedInstrument, collectiveId, router.isReady, setSelectedInstrument]);
 
-  const modifyUser = async (_id, action) => {
-    await axios.post(`${server}/api/collectives/${collectiveId}/user`, {
-      _id,
-      action: action,
-      collectiveId,
-    });
-    router.replace(router.asPath);
+  const modifyUser = async (userId, action) => {
+    await axios
+      .patch(`${server}/api/collectives/${collectiveId}/users/${userId}`, {
+        action: action,
+      })
+      .then(() => router.replace(router.asPath))
+      .catch((err) => console.log(err));
+  };
+
+  const deleteUser = (userId) => {
+    if (window.confirm("Ar tikrai norite pašalinti šį narį?")) {
+      axios
+        .delete(`${server}/api/collectives/${collectiveId}/users/${userId}`)
+        .then(() => router.replace(router.asPath))
+        .catch((err) => console.log(err));
+    }
   };
 
   const onInstrumentChange = (e) => {
@@ -180,25 +185,36 @@ function Collective({ data, collective }) {
                     className="d-flex justify-content-between"
                   >
                     {user.name}{" "}
-                    <Badge bg="danger">
-                      {user.status === "Declined" && "Atmestas"}
-                    </Badge>
-                    {user.status === "Requested" && (
-                      <>
-                        <Button
-                          variant="success"
-                          onClick={() => modifyUser(user._id, "accept")}
-                        >
-                          Priimti
-                        </Button>
-                        <Button
-                          variant="danger"
-                          onClick={() => modifyUser(user._id, "decline")}
-                        >
-                          Nepriimti
-                        </Button>
-                      </>
-                    )}
+                    <div>
+                      <Badge bg="danger">
+                        {user.status === "Declined" && "Atmestas"}
+                      </Badge>
+                      {user.status === "Requested" && (
+                        <>
+                          <Button
+                            variant="success"
+                            className="px-2 p-0 mx-2"
+                            onClick={() => modifyUser(user.userId, "accept")}
+                          >
+                            Priimti
+                          </Button>
+                          <Button
+                            className="px-2 p-0"
+                            variant="danger"
+                            onClick={() => modifyUser(user.userId, "decline")}
+                          >
+                            Nepriimti
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        className="mx-2 p-0 px-2"
+                        variant="dark"
+                        onClick={() => deleteUser(user.userId)}
+                      >
+                        Pašalinti
+                      </Button>
+                    </div>
                   </ListGroup.Item>
                 ))}
             </ListGroup>

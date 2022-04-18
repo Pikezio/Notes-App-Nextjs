@@ -7,7 +7,7 @@ export async function getSpecificPart(songId, part) {
 
   if (part === "all" || part === "---" || part == null) {
     const song = await Song.findById(songId).select(
-      "_id title composer arranger parts"
+      "_id title composer arranger video parts"
     );
     return JSON.stringify(song);
   }

@@ -79,7 +79,6 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
             </Card.Body>
           </Card>
           {otherParts}
-          {console.log(part)}
           {part.video && (
             <>
               <Button
