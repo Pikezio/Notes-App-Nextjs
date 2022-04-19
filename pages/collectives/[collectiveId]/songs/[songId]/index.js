@@ -1,5 +1,13 @@
 import { getSession } from "next-auth/react";
-import { Card, Container, Button, Collapse, Tabs, Tab } from "react-bootstrap";
+import {
+  Card,
+  Container,
+  Button,
+  Collapse,
+  Tabs,
+  Tab,
+  ListGroup,
+} from "react-bootstrap";
 import {
   doesPartExistForInstrument,
   getSpecificPart,
@@ -11,6 +19,14 @@ import YoutubePlayer from "../../../../../components/youtubePlayer";
 import { isOwner } from "../../../../../middleware/isUserCollectiveOwner";
 import { useState } from "react";
 import { checkSession } from "../../../../../middleware/checkSession";
+import dynamic from "next/dynamic";
+
+const PDFViewer = dynamic(
+  () => import("../../../../../components/pdfs/pdfViewer"),
+  {
+    ssr: false,
+  }
+);
 
 export default function SongDetails({ part, filteredInstruments, owner }) {
   const router = useRouter();
@@ -19,21 +35,25 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
   const baseUrl = `/collectives/${collectiveId}/songs`;
 
   const otherParts = (
-    <div>
-      Kitos partijos
-      <li>
-        <Link href={`${baseUrl}/${songId}?part=all`}>Visos</Link>
-      </li>
-      {filteredInstruments.map(
-        (instrument, idx) =>
-          instrument != part.instrument && (
-            <li key={idx}>
-              <Link href={`${baseUrl}/${songId}?part=${instrument}`}>
-                {instrument}
+    <div className="mt-2">
+      <h3>Kitos partijos</h3>
+      <ListGroup>
+        <Link passHref href={`${baseUrl}/${songId}?part=all`}>
+          <ListGroup.Item action>Visos</ListGroup.Item>
+        </Link>
+        {filteredInstruments.map(
+          (instrument, idx) =>
+            instrument != part.instrument && (
+              <Link
+                passHref
+                key={idx}
+                href={`${baseUrl}/${songId}?part=${instrument}`}
+              >
+                <ListGroup.Item action>{instrument}</ListGroup.Item>
               </Link>
-            </li>
-          )
-      )}
+            )
+        )}
+      </ListGroup>
     </div>
   );
 
@@ -65,14 +85,14 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
                     eventKey={idx}
                     title={item.filename ? item.filename : `Partija ${idx + 1}`}
                   >
-                    <div className="embed-responsive ">
-                      <embed
-                        className="embed-responsive-item"
-                        src={item.file}
-                        width="100%"
-                        height="800"
-                      />
-                    </div>
+                    <a
+                      href={`/api/pdf?songId=${songId}&part=${part.instrument}`}
+                      target="`_blank`"
+                    >
+                      Atidaryti kitame lange
+                    </a>
+
+                    <PDFViewer file={item.file} />
                   </Tab>
                 ))}
               </Tabs>
