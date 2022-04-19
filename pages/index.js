@@ -2,7 +2,7 @@ import { getSession } from "next-auth/react";
 import { getCollectives } from "../controllers/collectiveController";
 import ListOfCollectives from "../components/collectiveList";
 import Calendar from "../components/calendar";
-import { getAllConcerts } from "../controllers/concertController";
+import { getCollectiveConcerts } from "../controllers/concertController";
 
 export default function Home({ owned, member, concerts }) {
   return (
@@ -39,7 +39,7 @@ export async function getServerSideProps(context) {
   });
 
   // Request concert for all collectives
-  const concerts = JSON.parse(await getAllConcerts(all, 4));
+  const concerts = JSON.parse(await getCollectiveConcerts(all, 4));
 
   const concertsWithCollectives = concerts.map((concert) => {
     const collective = merged.find((collective) => {

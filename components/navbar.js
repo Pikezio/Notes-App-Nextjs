@@ -40,6 +40,11 @@ export default function Navbar() {
                     <Nav.Link>Kūrinių Biblioteka</Nav.Link>
                   </Link>
                 </NavItem>
+                <NavItem>
+                  <Link href="/concerts" passHref>
+                    <Nav.Link>Koncertai</Nav.Link>
+                  </Link>
+                </NavItem>
                 <Search />
               </Nav>
             </BNavbar.Collapse>

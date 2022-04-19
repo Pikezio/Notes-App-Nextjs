@@ -20,6 +20,7 @@ export default function CreateConcert({ songs }) {
   // Form field references
   const titleRef = useRef();
   const dateRef = useRef();
+  const descriptionRef = useRef();
 
   const addSong = (song) => {
     // check if songId is already in concertSongs
@@ -55,6 +56,7 @@ export default function CreateConcert({ songs }) {
       collectiveId: collectiveId,
       title: titleRef.current.value,
       date: dateRef.current.value,
+      description: descriptionRef.current.value,
       songs: concertSongs,
     };
 
@@ -83,6 +85,10 @@ export default function CreateConcert({ songs }) {
           <Form.Control.Feedback type="invalid">
             Pavadinimas yra privalomas.
           </Form.Control.Feedback>
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Aprašymas</Form.Label>
+          <Form.Control as="textarea" rows={5} ref={descriptionRef} />
         </Form.Group>
         <Form.Group as={Col} className="mb-3">
           <Form.Label>Data</Form.Label>
@@ -137,8 +143,6 @@ export async function getServerSideProps(context) {
 
   const { collectiveId } = context.query;
   const songs = JSON.parse(await getAllCollectiveSongs(collectiveId));
-
-  console.log(songs);
 
   return {
     props: {

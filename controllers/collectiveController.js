@@ -76,3 +76,11 @@ export async function getCollectiveOwner(id) {
   const collective = await Collective.findById(id);
   return collective.owner;
 }
+
+export async function getUserCollectiveIds(userId) {
+  await dbConnect();
+  const collectives = await Collective.find({
+    owner: userId,
+  }).select("_id");
+  return JSON.stringify(collectives);
+}

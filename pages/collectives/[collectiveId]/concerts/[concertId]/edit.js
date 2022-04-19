@@ -20,6 +20,7 @@ const ConcertEdit = ({ songs, concert }) => {
   // Form field references
   const [title, setTitle] = useState(concert.title);
   const [date, setDate] = useState(concert.date);
+  const [description, setDescription] = useState(concert.description);
   const [poster, setPoster] = useState(concert.poster);
 
   const different = !(
@@ -32,6 +33,7 @@ const ConcertEdit = ({ songs, concert }) => {
     title !== concert.title ||
     date !== concert.date ||
     poster !== concert.poster ||
+    description !== concert.description ||
     different;
 
   const addSong = (song) => {
@@ -69,6 +71,10 @@ const ConcertEdit = ({ songs, concert }) => {
       data.title = title;
     }
 
+    if (description !== concert.description) {
+      data.description = description;
+    }
+
     if (date !== concert.date) {
       data.date = date;
     }
@@ -80,8 +86,6 @@ const ConcertEdit = ({ songs, concert }) => {
     if (different) {
       data.songs = concertSongs;
     }
-
-    console.log(data);
 
     axios
       .patch(
@@ -108,6 +112,15 @@ const ConcertEdit = ({ songs, concert }) => {
           <Form.Control.Feedback type="invalid">
             Pavadinimas yra privalomas.
           </Form.Control.Feedback>
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Koncerto aprašymas</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={5}
+            onChange={(e) => setDescription(e.target.value)}
+            defaultValue={concert.description}
+          />
         </Form.Group>
         <Form.Group as={Col} className="mb-3">
           <Form.Label>Data</Form.Label>
