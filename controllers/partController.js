@@ -21,6 +21,7 @@ export async function getSpecificPart(songId, part) {
   ]);
 
   const parts = data.map((part) => ({
+    _id: part.parts._id,
     filename: part.parts.filename,
     file: part.parts.file,
   }));
@@ -53,4 +54,17 @@ export async function doesPartExistForInstrument(songId, instrument) {
   } else {
     return false;
   }
+}
+
+export async function getPartById(partId) {
+  await dbConnect();
+  const part = await Song.findOne(
+    {
+      "parts._id": partId,
+    },
+    {
+      "parts.$": 1,
+    }
+  );
+  return JSON.stringify(part);
 }

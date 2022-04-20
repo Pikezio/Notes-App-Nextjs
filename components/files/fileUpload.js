@@ -107,6 +107,7 @@ export default function FileUpload({
       <ListGroup>{selectedParts}</ListGroup>
       <Button
         disabled={!files.length}
+        className="my-3"
         onClick={async () => {
           await returnParts(await base64parts());
           setFiles([]);

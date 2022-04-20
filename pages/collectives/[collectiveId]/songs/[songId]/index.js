@@ -85,10 +85,7 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
                     eventKey={idx}
                     title={item.filename ? item.filename : `Partija ${idx + 1}`}
                   >
-                    <a
-                      href={`/api/pdf?songId=${songId}&part=${part.instrument}`}
-                      target="`_blank`"
-                    >
+                    <a href={`/api/pdf?partId=${item._id}`} target="`_blank`">
                       Atidaryti kitame lange
                     </a>
 

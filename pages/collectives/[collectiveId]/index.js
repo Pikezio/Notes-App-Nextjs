@@ -86,15 +86,32 @@ function Collective({ data, collective }) {
             <small>Kolektyvas</small>
             <h1>{collective.title}</h1>
           </div>
-          {collective.logo && (
-            <Image
-              alt="logo"
-              width={50}
-              height={50}
-              src={collective.logo}
-              className="rounded"
-            />
-          )}
+          <div className="d-flex">
+            <Link href={`${collectiveId}/instruments`} passHref>
+              <Button variant="dark" className="mx-2 my-1">
+                Redaguoti instrumentus
+              </Button>
+            </Link>
+            <Link href={`${collectiveId}/edit`} passHref>
+              <Button variant="dark" className="mx-2 my-1">
+                Redaguoti kolektyvą
+              </Button>
+            </Link>
+            <Link href={`${collectiveId}/concerts`} passHref>
+              <Button variant="dark" className="mx-2 my-1">
+                Koncertai
+              </Button>
+            </Link>
+            {collective.logo && (
+              <Image
+                alt="logo"
+                width={50}
+                height={50}
+                src={collective.logo}
+                className="rounded"
+              />
+            )}
+          </div>
         </div>
 
         <FloatingLabel controlId="floatingSelect" label="Partija">
@@ -125,7 +142,7 @@ function Collective({ data, collective }) {
           </Button>
         </div>
 
-        <ListGroup variant="flush">
+        <ListGroup className="mb-2">
           {songs &&
             songs
               .sort((a, b) => {
@@ -136,19 +153,23 @@ function Collective({ data, collective }) {
                 return 0;
               })
               .map((s) => (
-                <ListGroup.Item
+                <Link
+                  passHref
                   key={s._id}
-                  className="d-flex justify-content-between align-items-center"
+                  href={`${urlBase}/${s._id}?part=${selectedInstrument}`}
                 >
-                  <Link href={`${urlBase}/${s._id}?part=${selectedInstrument}`}>
-                    <a>{s.title}</a>
-                  </Link>
-                  {data.owner && (
-                    <Link href={`${urlBase}/${s._id}/edit`} passHref>
-                      <Button>Redaguoti</Button>
-                    </Link>
-                  )}
-                </ListGroup.Item>
+                  <ListGroup.Item
+                    action
+                    className="d-flex justify-content-between align-items-center"
+                  >
+                    <div className="lead">{s.title}</div>
+                    {data.owner && (
+                      <Link href={`${urlBase}/${s._id}/edit`} passHref>
+                        <Button>Redaguoti</Button>
+                      </Link>
+                    )}
+                  </ListGroup.Item>
+                </Link>
               ))}
         </ListGroup>
 
@@ -156,24 +177,7 @@ function Collective({ data, collective }) {
           <div>
             <div className="d-flex mb-2">
               <Link href={`${collectiveId}/songs/create`} passHref>
-                <Button variant="dark" className="mx-2 my-1">
-                  Pridėti kūrinį
-                </Button>
-              </Link>
-              <Link href={`${collectiveId}/instruments`} passHref>
-                <Button variant="dark" className="mx-2 my-1">
-                  Redaguoti instrumentus
-                </Button>
-              </Link>
-              <Link href={`${collectiveId}/edit`} passHref>
-                <Button variant="dark" className="mx-2 my-1">
-                  Redaguoti kolektyvą
-                </Button>
-              </Link>
-              <Link href={`${collectiveId}/concerts`} passHref>
-                <Button variant="dark" className="mx-2 my-1">
-                  Koncertai
-                </Button>
+                <Button variant="dark">Pridėti kūrinį</Button>
               </Link>
             </div>
             <h3>Kolektyvo nariai</h3>

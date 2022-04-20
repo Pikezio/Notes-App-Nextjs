@@ -2,7 +2,7 @@ import moment from "moment";
 import { getSession } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
-import { Container, ListGroup } from "react-bootstrap";
+import { Container, ListGroup, Badge } from "react-bootstrap";
 import { getUserCollectiveIds } from "../../controllers/collectiveController";
 import { getAllConcerts } from "../../controllers/concertController";
 import { checkSession } from "../../middleware/checkSession";
@@ -25,10 +25,12 @@ const ConcertPage = ({ concerts }) => {
         >
           <div className="d-flex justify-content-between">
             <div>
-              <h4>{concert.title}</h4>
-              <small>{concert.collectiveTitle}</small>
+              <div className="fw-bold">{concert.title}</div>
+              <Badge pill bg="secondary">
+                {concert.collectiveTitle}
+              </Badge>
             </div>
-            <p>{moment(concert.date).format("LLLL")}</p>
+            <div className="lead">{moment(concert.date).format("LLLL")}</div>
           </div>
         </Link>
       </ListGroup.Item>

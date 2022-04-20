@@ -60,7 +60,13 @@ const AllUserSongs = ({ songs, filterQuery }) => {
             href={`/collectives/${song.collectiveId}/songs/${song._id}`}
           >
             <ListGroup.Item action>
-              {song.title} | {song.composer} | {song.arranger}
+              <div className="d-flex justify-content-between">
+                <div className="lead">{song.title}</div>
+                <div>
+                  <small>Kompozicija: {song.composer} | </small>
+                  <small>Aranžuotė: {song.arranger}</small>
+                </div>
+              </div>
             </ListGroup.Item>
           </Link>
         ))}
@@ -82,7 +88,7 @@ const AllUserSongs = ({ songs, filterQuery }) => {
         </Button>
       </div>
 
-      <h1>Visi kūriniai</h1>
+      <h1>Kūriniai</h1>
       {list}
     </Container>
   );
