@@ -12,7 +12,8 @@ const YoutubePlayer = ({ videoUrl }) => {
 
   const [currentTime, setCurrentTime] = useState(0);
 
-  const [volume, setVolume] = useState(0);
+  const [volume, setVolume] = useState(0.5);
+  const [speed, setSpeed] = useState(1);
 
   const checkProgress = (progress) => {
     const time = progress.playedSeconds;
@@ -33,31 +34,51 @@ const YoutubePlayer = ({ videoUrl }) => {
         url={videoUrl}
         playing={playing}
         volume={volume}
+        playbackRate={speed}
         controls={true}
         width="100%"
-        height={600}
+        height={500}
+        light={true}
         onProgress={checkProgress}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       />
       <div className="py-2">
         <Button onClick={() => setStartTime(currentTime)}>
-          Pradžia {startTime / 60}
+          Nustatyti pradžią {startTime / 60}
         </Button>
         <Button className="mx-2" onClick={() => setEndTime(currentTime)}>
-          Pabaiga {endTime / 60}
+          Nustatyti pabaigą {endTime / 60}
         </Button>
         <Form.Group as={Row}>
-          <Form.Label column sm="4">
-            <span>Garsas </span>
-          </Form.Label>
-          <Col sm="8">
+          <Col>
+            <Form.Label column sm={4} className="border rounded">
+              <span>Garsas</span>
+            </Form.Label>
+          </Col>
+          <Col sm={9}>
             <RangeSlider
               value={volume}
               min={0}
               max={1}
               step={0.01}
               onChange={(e) => setVolume(e.target.value)}
+            />
+          </Col>
+        </Form.Group>
+        <Form.Group as={Row}>
+          <Col>
+            <Form.Label column sm={4} className="border rounded">
+              <span>Greitis</span>
+            </Form.Label>
+          </Col>
+          <Col sm={9}>
+            <RangeSlider
+              value={speed}
+              min={0}
+              max={1}
+              step={0.5}
+              onChange={(e) => setSpeed(e.target.value)}
             />
           </Col>
         </Form.Group>

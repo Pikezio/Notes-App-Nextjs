@@ -75,8 +75,24 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
                   passHref
                   href={`/collectives/${collectiveId}/songs/${songId}/edit`}
                 >
-                  <Button>Redaguoti</Button>
+                  <Button className="mx-2">Redaguoti</Button>
                 </Link>
+              )}
+              {part.video && (
+                <>
+                  <Button
+                    onClick={() => setOpenVideo(!openVideo)}
+                    aria-controls="collapse-video"
+                    aria-expanded={openVideo}
+                  >
+                    {openVideo ? "Nerodyti video" : "Rodyti video"}
+                  </Button>
+                  <Collapse in={openVideo}>
+                    <div id="collapse-video">
+                      <YoutubePlayer videoUrl={part.video} />
+                    </div>
+                  </Collapse>
+                </>
               )}
               <Tabs id="tab" className="my-3">
                 {part.parts.map((item, idx) => (
@@ -96,22 +112,6 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
             </Card.Body>
           </Card>
           {otherParts}
-          {part.video && (
-            <>
-              <Button
-                onClick={() => setOpenVideo(!openVideo)}
-                aria-controls="collapse-video"
-                aria-expanded={openVideo}
-              >
-                {openVideo ? "Nerodyti video" : "Rodyti video"}
-              </Button>
-              <Collapse in={openVideo}>
-                <div id="collapse-video">
-                  <YoutubePlayer videoUrl={part.video} />
-                </div>
-              </Collapse>
-            </>
-          )}
         </>
       ) : (
         <>

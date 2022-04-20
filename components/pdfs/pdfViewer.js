@@ -55,6 +55,8 @@ export default function PDFViewer({ file }) {
     </svg>
   );
 
+  console.log("hello");
+
   return (
     <div>
       <Row className="align-items-center">
@@ -72,7 +74,6 @@ export default function PDFViewer({ file }) {
           <Button onClick={() => setZoom(1)}>Nustatyti iš naujo</Button>
         </Col>
       </Row>
-      <div className="slider"></div>
       <p className="lead">
         {showTwoPages ? (
           <>
@@ -88,7 +89,6 @@ export default function PDFViewer({ file }) {
       <div className="d-flex justify-content-center">
         <Button
           className="mx-2"
-          type="button"
           disabled={pageNumber <= 1}
           onClick={previousPage}
         >
@@ -126,7 +126,6 @@ export default function PDFViewer({ file }) {
           )}
         </Document>
         <Button
-          type="button"
           disabled={
             showTwoPages ? pageNumber + 1 >= numPages : pageNumber >= numPages
           }
