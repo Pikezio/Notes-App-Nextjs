@@ -32,7 +32,7 @@ const useHistory = (initialState) => {
   return [history[index], setState, undo, redo];
 };
 
-const Drawing = ({ width, height, tool }) => {
+const Drawing = ({ width, height, tool, scale }) => {
   const [elements, setElements, undo, redo] = useHistory([]);
   const [selectedElement, setSelectedElement] = useState(null);
   const [action, setAction] = useState("none");
@@ -42,6 +42,7 @@ const Drawing = ({ width, height, tool }) => {
 
   const textAreaRef = useRef();
 
+  // Text input focusing
   useEffect(() => {
     const textArea = textAreaRef.current;
     if (action === "writing") {
@@ -50,6 +51,7 @@ const Drawing = ({ width, height, tool }) => {
     }
   }, [action, selectedElement]);
 
+  // Data fetching
   useEffect(() => {
     axios
       .get(`/api/notes?songId=${songId}&userId=${session.userId}`)
@@ -65,12 +67,15 @@ const Drawing = ({ width, height, tool }) => {
       .catch(console.error);
   }, [songId, session.userId]);
 
+  // Redrawing
   useEffect(() => {
     const canvas = document.getElementById("canvas");
     const context = canvas.getContext("2d");
-    const roughCanvas = rough.canvas(canvas);
 
     context.clearRect(0, 0, width, height);
+
+    const roughCanvas = rough.canvas(canvas);
+
     elements.forEach((element) => {
       if (action === "writing" && element.id === selectedElement.id) return;
       drawElement(roughCanvas, context, element);
@@ -255,8 +260,15 @@ const Drawing = ({ width, height, tool }) => {
     return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
   };
 
+  const deleteElement = (elementId) => {
+    const elementsCopy = [...elements];
+    const index = elementsCopy.findIndex((element) => element.id === elementId);
+    elementsCopy.splice(index, 1);
+    setElements(elementsCopy);
+  };
+
   const handleMouseDown = (e) => {
-    if (action === "writing") return;
+    if (action === "writing" || tool === "none") return;
 
     const { clientX, clientY } = getRelativeMousePosition(e);
     if (tool === "selection") {
@@ -278,6 +290,11 @@ const Drawing = ({ width, height, tool }) => {
         } else {
           setAction("resizing");
         }
+      }
+    } else if (tool === "eraser") {
+      const element = getElementAtPosition(clientX, clientY, elements);
+      if (element) {
+        deleteElement(element.id);
       }
     } else {
       const elementId = elements.length;
@@ -312,7 +329,7 @@ const Drawing = ({ width, height, tool }) => {
 
   const handleMouseMove = (e) => {
     const { clientX, clientY } = getRelativeMousePosition(e);
-    if (tool === "selection") {
+    if (tool === "selection" || tool === "eraser") {
       const element = getElementAtPosition(clientX, clientY, elements);
       e.target.style.cursor = element
         ? cursorForPosition(element.position)

@@ -17,8 +17,6 @@ export const useContainerDimensions = (myRef) => {
       setDimensions(getDimensions());
     }
 
-    console.log(getDimensions());
-
     window.addEventListener("resize", handleResize);
 
     return () => {

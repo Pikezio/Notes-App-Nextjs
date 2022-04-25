@@ -16,7 +16,7 @@ const DrawingButtons = ({
   square,
   pencil,
   text,
-  eraser,
+  erase,
   selected,
 }) => {
   return (
@@ -80,7 +80,8 @@ const DrawingButtons = ({
           fontSize={20}
           width={25}
           height={25}
-          onClick={eraser}
+          onClick={erase}
+          className={selected === "eraser" ? styles.selected : ""}
         />
       </div>
     </div>

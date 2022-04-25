@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Modal, Container } from "react-bootstrap";
 import { Document, pdfjs } from "react-pdf";
 import { useContainerDimensions } from "../../util/useContainerDimensions";
@@ -23,20 +23,36 @@ export default function PDFViewer({ file }) {
 
   const [action, setAction] = useState("none");
 
+  const [initialSize, setInitialSize] = useState(null);
+
   const topMenu = useRef();
   const noteDimensions = useRef();
 
   const { height, width } = useWindowDimensions();
   const { width: noteWidth } = useContainerDimensions(noteDimensions);
 
-  const noteHeight = !fullscreen
-    ? (height / 100) * NOTE_SCREEN_PERCENTAGE
-    : height - topMenu.current.clientHeight - 35;
+  useEffect(() => {
+    if (initialSize == null && noteWidth > 200) {
+      setInitialSize({ noteWidth, noteHeight });
+    }
+  }, [noteWidth]);
+
+  // const noteHeight = !fullscreen
+  //   ? (height / 100) * NOTE_SCREEN_PERCENTAGE
+  //   : height - topMenu.current.clientHeight - 35;
+
+  const noteHeight = 1200;
 
   const showTwoPages = width > LARGE_SCREEN_BREAKPOINT && numPages > 1;
   if (showTwoPages && pageNumber % 2 === 0) {
     setPageNumber(pageNumber - 1);
   }
+
+  const calculateNoteScreenPercentage = () => {
+    const widthScreenPercentage = 100 - (width * 100) / (width + noteWidth);
+    const heightScreenPercentage = 100 - (height * 100) / (height + noteHeight);
+    return { width: widthScreenPercentage, height: heightScreenPercentage };
+  };
 
   function onDocumentLoadSuccess({ numPages: nextNumPages }) {
     setNumPages(nextNumPages);
@@ -45,6 +61,7 @@ export default function PDFViewer({ file }) {
 
   function onRenderSuccess() {
     window.dispatchEvent(new Event("resize"));
+    setInitialSize({ noteWidth, noteHeight });
   }
 
   function changePage(offset) {
@@ -79,6 +96,10 @@ export default function PDFViewer({ file }) {
     setAction("text");
   };
 
+  const deleteClick = () => {
+    setAction("eraser");
+  };
+
   const viewer = (
     <Container>
       <TopRow
@@ -97,6 +118,7 @@ export default function PDFViewer({ file }) {
         cursor={cursorClick}
         pencil={pencilClick}
         text={textClick}
+        erase={deleteClick}
         selected={action}
       />
       <div className="d-flex justify-content-center">
@@ -116,7 +138,12 @@ export default function PDFViewer({ file }) {
               onLoadSuccess={onDocumentLoadSuccess}
               className="d-flex justify-content-center"
             >
-              <Drawing height={noteHeight} width={noteWidth} tool={action} />
+              <Drawing
+                height={noteHeight}
+                width={noteWidth}
+                tool={action}
+                scale={calculateNoteScreenPercentage()}
+              />
 
               {showTwoPages ? (
                 <div className="d-flex flex-row border rounded">
