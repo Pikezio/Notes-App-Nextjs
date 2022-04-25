@@ -3,6 +3,9 @@ import Layout from "../components/layout";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
 import { RecoilRoot } from "recoil";
 import React from "react";
+import { config } from "@fortawesome/fontawesome-svg-core";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+config.autoAddCss = false;
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (

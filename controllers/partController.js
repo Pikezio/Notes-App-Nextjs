@@ -56,6 +56,24 @@ export async function doesPartExistForInstrument(songId, instrument) {
   }
 }
 
+// gets list of unique instruments for each part of the specified song
+export async function getUniquePartInstruments(songId) {
+  await dbConnect();
+  const parts = await Song.find(
+    {
+      _id: songId,
+    },
+    {
+      id: 1,
+      "parts.instrument": 1,
+    }
+  );
+  const instruments = parts[0].parts.map((part) => part.instrument);
+  const uniqueInstruments = [...new Set(instruments)];
+
+  return uniqueInstruments;
+}
+
 export async function getPartById(partId) {
   await dbConnect();
   const part = await Song.findOne(

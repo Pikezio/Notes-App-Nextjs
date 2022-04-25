@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { Badge, Button, Container, ListGroup } from "react-bootstrap";
 
 function ListOfAllCollectives({ collectives }) {
+  console.log(collectives);
   const router = useRouter();
   const { data: session, status } = useSession();
   const submitJoin = async (collectiveId) => {

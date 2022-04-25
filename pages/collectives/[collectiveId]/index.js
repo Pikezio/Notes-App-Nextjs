@@ -21,6 +21,7 @@ import {
   Button,
   Badge,
 } from "react-bootstrap";
+import ModifyMembers from "../../../components/modifyMembers";
 
 function Collective({ data, collective }) {
   const router = useRouter();
@@ -48,24 +49,6 @@ function Collective({ data, collective }) {
       .then((res) => setSongs(res.data))
       .catch((err) => console.log(err));
   }, [selectedInstrument, collectiveId, router.isReady, setSelectedInstrument]);
-
-  const modifyUser = async (userId, action) => {
-    await axios
-      .patch(`${server}/api/collectives/${collectiveId}/users/${userId}`, {
-        action: action,
-      })
-      .then(() => router.replace(router.asPath))
-      .catch((err) => console.log(err));
-  };
-
-  const deleteUser = (userId) => {
-    if (window.confirm("Ar tikrai norite pašalinti šį narį?")) {
-      axios
-        .delete(`${server}/api/collectives/${collectiveId}/users/${userId}`)
-        .then(() => router.replace(router.asPath))
-        .catch((err) => console.log(err));
-    }
-  };
 
   const onInstrumentChange = (e) => {
     setSelectedInstrument(e.target.value);
@@ -180,48 +163,8 @@ function Collective({ data, collective }) {
                 <Button variant="dark">Pridėti kūrinį</Button>
               </Link>
             </div>
-            <h3>Kolektyvo nariai</h3>
-            <ListGroup>
-              {data.requestedUsers &&
-                data.requestedUsers.map((user) => (
-                  <ListGroup.Item
-                    key={user._id}
-                    className="d-flex justify-content-between"
-                  >
-                    {user.name}{" "}
-                    <div>
-                      <Badge bg="danger">
-                        {user.status === "Declined" && "Atmestas"}
-                      </Badge>
-                      {user.status === "Requested" && (
-                        <>
-                          <Button
-                            variant="success"
-                            className="px-2 p-0 mx-2"
-                            onClick={() => modifyUser(user.userId, "accept")}
-                          >
-                            Priimti
-                          </Button>
-                          <Button
-                            className="px-2 p-0"
-                            variant="danger"
-                            onClick={() => modifyUser(user.userId, "decline")}
-                          >
-                            Nepriimti
-                          </Button>
-                        </>
-                      )}
-                      <Button
-                        className="mx-2 p-0 px-2"
-                        variant="dark"
-                        onClick={() => deleteUser(user.userId)}
-                      >
-                        Pašalinti
-                      </Button>
-                    </div>
-                  </ListGroup.Item>
-                ))}
-            </ListGroup>
+            {console.log(data)}
+            <ModifyMembers users={data.users} />
           </div>
         )}
       </Container>
@@ -256,13 +199,12 @@ export async function getServerSideProps(context) {
 
   if (owner) {
     //const songs = JSON.parse(await getSongs(collectiveId));
-    const requestedUsers = await JSON.parse(
-      await getCollectiveMembers(collectiveId)
-    ).members;
+    const users = await JSON.parse(await getCollectiveMembers(collectiveId))
+      .members;
     data = {
       owner: true,
       member: false,
-      requestedUsers,
+      users,
     };
   }
 

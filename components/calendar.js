@@ -22,6 +22,14 @@ const Calendar = ({ concerts }) => {
                   >
                     <Button variant="primary">Peržiūrėti</Button>
                   </Link>
+                  <Link
+                    passHref
+                    href={`/collectives/${concert.collectiveId}/concerts/${concert._id}/performance`}
+                  >
+                    <Button className="mx-2" variant="primary">
+                      Groti
+                    </Button>
+                  </Link>
                 </Card.Body>
               </Card>
             </Col>

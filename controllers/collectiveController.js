@@ -80,7 +80,10 @@ export async function getCollectiveOwner(id) {
 export async function getUserCollectiveIds(userId) {
   await dbConnect();
   const collectives = await Collective.find({
-    $or: [{ owner: userId }, { "members.userId": userId }],
+    $or: [
+      { owner: userId },
+      { "members.userId": userId, "members.status": "Accepted" },
+    ],
   }).select("_id title color");
   return JSON.stringify(collectives);
 }

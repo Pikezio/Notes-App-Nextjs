@@ -1,7 +1,7 @@
 import React from "react";
 import { Page } from "react-pdf";
 
-const PDFPage = ({ pageNumber, height, scale }) => {
+const PDFPage = ({ pageNumber, height, scale, onRenderSuccess }) => {
   return (
     <Page
       pageNumber={pageNumber}
@@ -9,7 +9,8 @@ const PDFPage = ({ pageNumber, height, scale }) => {
       renderTextLayer={false}
       height={height}
       scale={scale}
-    />
+      onRenderSuccess={onRenderSuccess}
+    ></Page>
   );
 };
 
