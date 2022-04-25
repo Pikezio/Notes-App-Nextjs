@@ -71,6 +71,7 @@ const DrawingButtons = ({
           width={25}
           height={25}
           onClick={text}
+          className={selected === "text" ? styles.selected : ""}
         />
         <FontAwesomeIcon
           cursor="pointer"

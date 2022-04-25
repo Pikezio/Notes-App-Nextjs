@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import rough from "roughjs/bundled/rough.cjs";
 import { useSession } from "next-auth/react";
 import getStroke from "perfect-freehand";
@@ -40,6 +40,16 @@ const Drawing = ({ width, height, tool }) => {
   const { data: session } = useSession();
   const { songId } = useRouter().query;
 
+  const textAreaRef = useRef();
+
+  useEffect(() => {
+    const textArea = textAreaRef.current;
+    if (action === "writing") {
+      textArea.focus();
+      textArea.value = selectedElement.text;
+    }
+  }, [action, selectedElement]);
+
   useEffect(() => {
     axios
       .get(`/api/notes?songId=${songId}&userId=${session.userId}`)
@@ -61,8 +71,11 @@ const Drawing = ({ width, height, tool }) => {
     const roughCanvas = rough.canvas(canvas);
 
     context.clearRect(0, 0, width, height);
-    elements.forEach((element) => drawElement(roughCanvas, context, element));
-  }, [elements, width, height]);
+    elements.forEach((element) => {
+      if (action === "writing" && element.id === selectedElement.id) return;
+      drawElement(roughCanvas, context, element);
+    });
+  }, [elements, width, height, selectedElement, action]);
 
   // Undo, redo event listener
   useEffect(() => {
@@ -93,6 +106,8 @@ const Drawing = ({ width, height, tool }) => {
         return { id, x1, y1, x2, y2, type, roughElement };
       case "pencil":
         return { id, type, points: [{ x: x1, y: y1 }] };
+      case "text":
+        return { id, type, x1, y1, x2, y2, text: "" };
     }
   };
 
@@ -129,10 +144,15 @@ const Drawing = ({ width, height, tool }) => {
         );
         context.fill(new Path2D(pathData));
         break;
+      case "text":
+        context.textBaseline = "top";
+        context.font = "20px Arial";
+        context.fillText(element.text, element.x1, element.y1);
+        break;
     }
   };
 
-  const updateElement = (id, x1, y1, x2, y2, type) => {
+  const updateElement = (id, x1, y1, x2, y2, type, options) => {
     const elementsCopy = [...elements];
 
     switch (type) {
@@ -145,6 +165,15 @@ const Drawing = ({ width, height, tool }) => {
           ...elementsCopy[id].points,
           { x: x2, y: y2 },
         ];
+        break;
+      case "text":
+        const context = document.getElementById("canvas").getContext("2d");
+        const textWidth = context.measureText(options.text).width;
+        const textHeight = 20;
+        elementsCopy[id] = {
+          ...createElement(id, x1, y1, x1 + textWidth, y1 + textHeight, type),
+          text: options.text,
+        };
         break;
     }
     setElements(elementsCopy, true);
@@ -206,6 +235,9 @@ const Drawing = ({ width, height, tool }) => {
         });
         return betweenAnyPoints ? "inside" : null;
       }
+      case "text": {
+        return x >= x1 && x <= x2 && y >= y1 && y <= y2 ? "inside" : null;
+      }
     }
   };
 
@@ -224,6 +256,8 @@ const Drawing = ({ width, height, tool }) => {
   };
 
   const handleMouseDown = (e) => {
+    if (action === "writing") return;
+
     const { clientX, clientY } = getRelativeMousePosition(e);
     if (tool === "selection") {
       const element = getElementAtPosition(clientX, clientY, elements);
@@ -257,7 +291,7 @@ const Drawing = ({ width, height, tool }) => {
       );
       setSelectedElement(element);
       setElements((elements) => [...elements, element]);
-      setAction("drawing");
+      setAction(tool === "text" ? "writing" : "drawing");
     }
   };
 
@@ -314,13 +348,16 @@ const Drawing = ({ width, height, tool }) => {
           const newX1 = clientX - offsetX;
           const newY1 = clientY - offsetY;
 
+          const options = type === "text" ? { text: selectedElement.text } : {};
+
           updateElement(
             id,
             newX1,
             newY1,
             newX1 + elementWidth,
             newY1 + elementHeight,
-            type
+            type,
+            options
           );
         }
         break;
@@ -378,8 +415,18 @@ const Drawing = ({ width, height, tool }) => {
     return ["line", "rectangle"].includes(type);
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e) => {
+    const { clientX, clientY } = getRelativeMousePosition(e);
     if (selectedElement) {
+      if (
+        selectedElement.type === "text" &&
+        clientX - selectedElement.offsetX === selectedElement.x1 &&
+        clientY - selectedElement.offsetY === selectedElement.y1
+      ) {
+        setAction("writing");
+        return;
+      }
+
       const index = selectedElement.id;
       const { id, type } = elements[index];
       if (
@@ -391,8 +438,20 @@ const Drawing = ({ width, height, tool }) => {
       }
     }
 
+    if (action === "writing") {
+      return;
+    }
+
     setAction("none");
     setSelectedElement(null);
+    // submitToDatabase();
+  };
+
+  const handleBlur = (e) => {
+    const { id, type, x1, y1 } = selectedElement;
+    setAction("none");
+    setSelectedElement(null);
+    updateElement(id, x1, y1, null, null, type, { text: e.target.value });
     // submitToDatabase();
   };
 
@@ -409,7 +468,26 @@ const Drawing = ({ width, height, tool }) => {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-      />
+      ></canvas>
+      {action === "writing" && (
+        <textarea
+          onBlur={handleBlur}
+          ref={textAreaRef}
+          style={{
+            position: "absolute",
+            margin: 0,
+            padding: 0,
+            border: 0,
+            outline: 0,
+            overflow: "hidden",
+            whiteSpace: "pre",
+            background: "transparent",
+            zIndex: 2,
+            top: selectedElement.y1,
+            left: selectedElement.x1,
+          }}
+        />
+      )}
     </>
   );
 };

@@ -75,6 +75,10 @@ export default function PDFViewer({ file }) {
     setAction("pencil");
   };
 
+  const textClick = () => {
+    setAction("text");
+  };
+
   const viewer = (
     <Container>
       <TopRow
@@ -92,6 +96,7 @@ export default function PDFViewer({ file }) {
         square={squareClick}
         cursor={cursorClick}
         pencil={pencilClick}
+        text={textClick}
         selected={action}
       />
       <div className="d-flex justify-content-center">
