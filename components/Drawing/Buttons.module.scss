@@ -1,0 +1,14 @@
+.selected {
+  background-color: lightgray;
+  box-shadow: 2px 2px 2px lightgray;
+  border: 1px solid gray;
+}
+
+.notSelected {
+  background-color: white;
+  box-shadow: none;
+  border: 1px solid gray;
+  &:hover {
+    background-color: #b0bcff;
+  }
+}

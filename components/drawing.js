@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useRouter } from "next/router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import rough from "roughjs/bundled/rough.cjs";
 import { useSession } from "next-auth/react";
 import getStroke from "perfect-freehand";
@@ -32,7 +32,15 @@ const useHistory = (initialState) => {
   return [history[index], setState, undo, redo];
 };
 
-const Drawing = ({ width, height, tool, scale }) => {
+const Drawing = ({
+  width,
+  height,
+  tool,
+  scale,
+  showTwoPages,
+  pageNumber,
+  partId,
+}) => {
   const [elements, setElements, undo, redo] = useHistory([]);
   const [selectedElement, setSelectedElement] = useState(null);
   const [action, setAction] = useState("none");
@@ -51,36 +59,66 @@ const Drawing = ({ width, height, tool, scale }) => {
     }
   }, [action, selectedElement]);
 
+  const showingRightPage = pageNumber % 2 === 0;
+
   // Data fetching
   useEffect(() => {
-    axios
-      .get(`/api/notes?songId=${songId}&userId=${session.userId}`)
-      .then((res) => {
-        let parsedElements;
-        try {
-          parsedElements = JSON.parse(res.data.elements);
-          setElements(parsedElements);
-        } catch (e) {
-          console.error("Parsing error.");
-        }
-      })
-      .catch(console.error);
-  }, [songId, session.userId]);
+    const getDataElements = async (pages) => {
+      axios
+        .get(
+          `/api/notes?userId=${session.userId}&songId=${songId}&partId=${partId}&page=${pages}`
+        )
+        .then((res) => {
+          try {
+            const parsed = JSON.parse(res.data.elements);
+            setElements(parsed);
+          } catch (e) {
+            setElements([]);
+          }
+        });
+    };
+    if (pageNumber % 2 === 0 && pageNumber > 0) {
+      getDataElements(`${pageNumber - 1}-${pageNumber}`);
+    } else {
+      getDataElements(`${pageNumber}-${pageNumber + 1}`);
+    }
+  }, [showTwoPages, pageNumber, partId, songId]);
 
   // Redrawing
-  useEffect(() => {
-    const canvas = document.getElementById("canvas");
+  useLayoutEffect(() => {
+    const canvas = document.getElementById(
+      `canvas-${partId}-${session.userId}`
+    );
     const context = canvas.getContext("2d");
 
     context.clearRect(0, 0, width, height);
 
+    context.save();
+    context.scale(scale, scale);
+
     const roughCanvas = rough.canvas(canvas);
 
-    elements.forEach((element) => {
-      if (action === "writing" && element.id === selectedElement.id) return;
-      drawElement(roughCanvas, context, element);
-    });
-  }, [elements, width, height, selectedElement, action]);
+    if (showingRightPage) {
+      context.translate(-width / scale, 0);
+    }
+
+    if (elements && elements.length !== 0) {
+      elements.forEach((element) => {
+        if (action === "writing" && element.id === selectedElement.id) return;
+        drawElement(roughCanvas, context, element);
+      });
+    }
+
+    context.restore();
+  }, [
+    elements,
+    width,
+    height,
+    selectedElement,
+    action,
+    scale,
+    showingRightPage,
+  ]);
 
   // Undo, redo event listener
   useEffect(() => {
@@ -144,7 +182,7 @@ const Drawing = ({ width, height, tool, scale }) => {
       case "pencil":
         const pathData = getSvgPathFromStroke(
           getStroke(element.points, {
-            size: 10,
+            size: 5,
           })
         );
         context.fill(new Path2D(pathData));
@@ -172,9 +210,11 @@ const Drawing = ({ width, height, tool, scale }) => {
         ];
         break;
       case "text":
-        const context = document.getElementById("canvas").getContext("2d");
-        const textWidth = context.measureText(options.text).width;
-        const textHeight = 20;
+        const context = document
+          .getElementById(`canvas-${partId}-${session.userId}`)
+          .getContext("2d");
+        const textWidth = context.measureText(options.text).width * scale;
+        const textHeight = 20 * scale;
         elementsCopy[id] = {
           ...createElement(id, x1, y1, x1 + textWidth, y1 + textHeight, type),
           text: options.text,
@@ -184,11 +224,15 @@ const Drawing = ({ width, height, tool, scale }) => {
     setElements(elementsCopy, true);
   };
 
-  // TODO: activate this
   const submitToDatabase = () => {
+    const pages = !showingRightPage
+      ? { p1: pageNumber, p2: pageNumber + 1 }
+      : { p1: pageNumber - 1, p2: pageNumber };
     const data = {
-      songId,
       userId: session.userId,
+      songId,
+      partId,
+      page: pages.p1 + "-" + pages.p2,
       elements: JSON.stringify(elements),
     };
     axios.post(`/api/notes/`, data).catch(console.error);
@@ -196,10 +240,17 @@ const Drawing = ({ width, height, tool, scale }) => {
 
   const getRelativeMousePosition = (e) => {
     const rect = e.target.getBoundingClientRect();
-    return {
-      clientX: e.clientX - rect.left,
-      clientY: e.clientY - rect.top,
-    };
+    if (showingRightPage) {
+      return {
+        clientX: (e.clientX - rect.left + width) / scale,
+        clientY: (e.clientY - rect.top) / scale,
+      };
+    } else {
+      return {
+        clientX: (e.clientX - rect.left) / scale,
+        clientY: (e.clientY - rect.top) / scale,
+      };
+    }
   };
 
   const nearPoint = (x, y, x1, y1, name) => {
@@ -461,7 +512,7 @@ const Drawing = ({ width, height, tool, scale }) => {
 
     setAction("none");
     setSelectedElement(null);
-    // submitToDatabase();
+    submitToDatabase();
   };
 
   const handleBlur = (e) => {
@@ -469,7 +520,7 @@ const Drawing = ({ width, height, tool, scale }) => {
     setAction("none");
     setSelectedElement(null);
     updateElement(id, x1, y1, null, null, type, { text: e.target.value });
-    // submitToDatabase();
+    submitToDatabase();
   };
 
   return (
@@ -477,15 +528,17 @@ const Drawing = ({ width, height, tool, scale }) => {
       <canvas
         style={{
           position: "absolute",
+          // backgroundColor: "gray",
           zIndex: 1,
         }}
-        id="canvas"
+        id={`canvas-${partId}-${session.userId}`}
         width={width}
         height={height}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-      ></canvas>
+      />
+
       {action === "writing" && (
         <textarea
           onBlur={handleBlur}
@@ -500,8 +553,10 @@ const Drawing = ({ width, height, tool, scale }) => {
             whiteSpace: "pre",
             background: "transparent",
             zIndex: 2,
-            top: selectedElement.y1,
-            left: selectedElement.x1,
+            top: selectedElement.y1 * scale,
+            left: !showingRightPage
+              ? selectedElement.x1 * scale
+              : selectedElement.x1 * scale - width,
           }}
         />
       )}

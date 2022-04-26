@@ -8,7 +8,7 @@ import {
   faSquare,
   faT,
 } from "@fortawesome/free-solid-svg-icons";
-import styles from "./Buttons.module.css";
+import styles from "./Buttons.module.scss";
 
 const DrawingButtons = ({
   cursor,
@@ -31,7 +31,9 @@ const DrawingButtons = ({
           width={25}
           height={25}
           onClick={cursor}
-          className={selected === "selection" ? styles.selected : ""}
+          className={
+            selected === "selection" ? styles.selected : styles.notSelected
+          }
         />
         <FontAwesomeIcon
           cursor="pointer"
@@ -41,7 +43,7 @@ const DrawingButtons = ({
           width={25}
           height={25}
           onClick={line}
-          className={selected === "line" ? styles.selected : ""}
+          className={selected === "line" ? styles.selected : styles.notSelected}
         />
         <FontAwesomeIcon
           cursor="pointer"
@@ -51,7 +53,9 @@ const DrawingButtons = ({
           width={25}
           height={25}
           onClick={square}
-          className={selected === "rectangle" ? styles.selected : ""}
+          className={
+            selected === "rectangle" ? styles.selected : styles.notSelected
+          }
         />
         <FontAwesomeIcon
           cursor="pointer"
@@ -61,7 +65,9 @@ const DrawingButtons = ({
           width={25}
           height={25}
           onClick={pencil}
-          className={selected === "pencil" ? styles.selected : ""}
+          className={
+            selected === "pencil" ? styles.selected : styles.notSelected
+          }
         />
         <FontAwesomeIcon
           cursor="pointer"
@@ -71,7 +77,7 @@ const DrawingButtons = ({
           width={25}
           height={25}
           onClick={text}
-          className={selected === "text" ? styles.selected : ""}
+          className={selected === "text" ? styles.selected : styles.notSelected}
         />
         <FontAwesomeIcon
           cursor="pointer"
@@ -81,7 +87,9 @@ const DrawingButtons = ({
           width={25}
           height={25}
           onClick={erase}
-          className={selected === "eraser" ? styles.selected : ""}
+          className={
+            selected === "eraser" ? styles.selected : styles.notSelected
+          }
         />
       </div>
     </div>

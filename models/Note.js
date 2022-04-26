@@ -9,6 +9,11 @@ const NoteSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  partId: {
+    type: String,
+    required: true,
+  },
+  page: String,
   elements: String,
 });
 

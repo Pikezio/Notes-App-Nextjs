@@ -10,9 +10,11 @@ import TopRow from "./topRow";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
-export default function PDFViewer({ file }) {
+export default function PDFViewer({ file, partId }) {
   const NOTE_SCREEN_PERCENTAGE = 90;
   const LARGE_SCREEN_BREAKPOINT = 1950;
+
+  const NOTE_HEIGHT = 1200;
 
   const [zoom, setZoom] = useState(1);
 
@@ -23,25 +25,18 @@ export default function PDFViewer({ file }) {
 
   const [action, setAction] = useState("none");
 
-  const [initialSize, setInitialSize] = useState(null);
-
   const topMenu = useRef();
   const noteDimensions = useRef();
 
   const { height, width } = useWindowDimensions();
-  const { width: noteWidth } = useContainerDimensions(noteDimensions);
-
-  useEffect(() => {
-    if (initialSize == null && noteWidth > 200) {
-      setInitialSize({ noteWidth, noteHeight });
-    }
-  }, [noteWidth]);
+  const { width: noteWidth, height: noteHeight } =
+    useContainerDimensions(noteDimensions);
 
   // const noteHeight = !fullscreen
   //   ? (height / 100) * NOTE_SCREEN_PERCENTAGE
   //   : height - topMenu.current.clientHeight - 35;
 
-  const noteHeight = 1200;
+  // const noteHeight = 1200;
 
   const showTwoPages = width > LARGE_SCREEN_BREAKPOINT && numPages > 1;
   if (showTwoPages && pageNumber % 2 === 0) {
@@ -61,7 +56,6 @@ export default function PDFViewer({ file }) {
 
   function onRenderSuccess() {
     window.dispatchEvent(new Event("resize"));
-    setInitialSize({ noteWidth, noteHeight });
   }
 
   function changePage(offset) {
@@ -102,16 +96,18 @@ export default function PDFViewer({ file }) {
 
   const viewer = (
     <Container>
-      <TopRow
-        numPages={numPages}
-        showTwoPages={showTwoPages}
-        pageNumber={pageNumber}
-        zoom={zoom}
-        setZoom={setZoom}
-        fullscreen={fullscreen}
-        setFullscreen={setFullscreen}
-        topMenu={topMenu}
-      />
+      <div className="mb-2">
+        <TopRow
+          numPages={numPages}
+          showTwoPages={showTwoPages}
+          pageNumber={pageNumber}
+          zoom={zoom}
+          setZoom={setZoom}
+          fullscreen={fullscreen}
+          setFullscreen={setFullscreen}
+          topMenu={topMenu}
+        />
+      </div>
       <DrawingButtons
         line={lineClick}
         square={squareClick}
@@ -142,20 +138,23 @@ export default function PDFViewer({ file }) {
                 height={noteHeight}
                 width={noteWidth}
                 tool={action}
-                scale={calculateNoteScreenPercentage()}
+                scale={zoom}
+                showTwoPages={showTwoPages}
+                pageNumber={pageNumber}
+                partId={partId}
               />
 
               {showTwoPages ? (
                 <div className="d-flex flex-row border rounded">
                   <PDFPage
-                    height={noteHeight}
+                    height={NOTE_HEIGHT}
                     scale={zoom}
                     pageNumber={pageNumber}
                     onRenderSuccess={onRenderSuccess}
                   />
                   {pageNumber + 1 <= numPages && (
                     <PDFPage
-                      height={noteHeight}
+                      height={NOTE_HEIGHT}
                       scale={zoom}
                       pageNumber={pageNumber + 1}
                       onRenderSuccess={onRenderSuccess}
@@ -165,7 +164,7 @@ export default function PDFViewer({ file }) {
               ) : (
                 <div className="border rounded">
                   <PDFPage
-                    height={noteHeight}
+                    height={NOTE_HEIGHT}
                     scale={zoom}
                     pageNumber={pageNumber}
                     onRenderSuccess={onRenderSuccess}

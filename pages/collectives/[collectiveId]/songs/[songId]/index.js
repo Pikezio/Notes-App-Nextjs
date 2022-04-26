@@ -7,7 +7,6 @@ import {
   Tabs,
   Tab,
   ListGroup,
-  Modal,
 } from "react-bootstrap";
 import {
   doesPartExistForInstrument,
@@ -21,7 +20,6 @@ import { isOwner } from "../../../../../middleware/isUserCollectiveOwner";
 import { useState } from "react";
 import { checkSession } from "../../../../../middleware/checkSession";
 import dynamic from "next/dynamic";
-import Drawing from "../../../../../components/drawing";
 
 const PDFViewer = dynamic(
   () => import("../../../../../components/pdfs/pdfViewer"),
@@ -107,7 +105,7 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
                     <a href={`/api/pdf?partId=${item._id}`} target="`_blank`">
                       Atidaryti kitame lange
                     </a>
-                    <PDFViewer file={item.file} />
+                    <PDFViewer file={item.file} partId={item._id} />
                   </Tab>
                 ))}
               </Tabs>
