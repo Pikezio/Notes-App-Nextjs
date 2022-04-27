@@ -4,10 +4,14 @@ export const useContainerDimensions = (myRef) => {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
-    const getDimensions = () => ({
-      width: myRef.current.offsetWidth,
-      height: myRef.current.offsetHeight,
-    });
+    const getDimensions = () => {
+      if (myRef.current) {
+        return {
+          width: myRef.current.offsetWidth,
+          height: myRef.current.offsetHeight,
+        };
+      }
+    };
 
     const handleResize = () => {
       setDimensions(getDimensions());

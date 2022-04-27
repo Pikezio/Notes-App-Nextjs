@@ -35,6 +35,8 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
 
   const baseUrl = `/collectives/${collectiveId}/songs`;
 
+  const defaultNoteHeight = 1200;
+
   const otherParts = (
     <div className="mt-2">
       <h3>Kitos partijos</h3>
@@ -95,7 +97,7 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
                   </Collapse>
                 </>
               )}
-              <Tabs id="tab" className="my-3">
+              <Tabs id="tab" className="my-3" unmountOnExit={true}>
                 {part.parts.map((item, idx) => (
                   <Tab
                     key={idx}
@@ -105,7 +107,11 @@ export default function SongDetails({ part, filteredInstruments, owner }) {
                     <a href={`/api/pdf?partId=${item._id}`} target="`_blank`">
                       Atidaryti kitame lange
                     </a>
-                    <PDFViewer file={item.file} partId={item._id} />
+                    <PDFViewer
+                      file={item.file}
+                      partId={item._id}
+                      defaultNoteHeight={defaultNoteHeight}
+                    />
                   </Tab>
                 ))}
               </Tabs>

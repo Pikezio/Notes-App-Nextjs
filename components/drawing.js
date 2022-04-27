@@ -71,7 +71,7 @@ const Drawing = ({
         .then((res) => {
           try {
             const parsed = JSON.parse(res.data.elements);
-            setElements(parsed);
+            setElements(parsed, true);
           } catch (e) {
             setElements([]);
           }
@@ -82,10 +82,10 @@ const Drawing = ({
     } else {
       getDataElements(`${pageNumber}-${pageNumber + 1}`);
     }
-  }, [showTwoPages, pageNumber, partId, songId]);
+  }, [pageNumber, partId, songId]);
 
   // Redrawing
-  useLayoutEffect(() => {
+  useEffect(() => {
     const canvas = document.getElementById(
       `canvas-${partId}-${session.userId}`
     );
@@ -240,16 +240,38 @@ const Drawing = ({
 
   const getRelativeMousePosition = (e) => {
     const rect = e.target.getBoundingClientRect();
+
+    let touches = null;
+    if (e) {
+      if (e.touches) {
+        touches = e.touches[0];
+      }
+    }
+
     if (showingRightPage) {
-      return {
-        clientX: (e.clientX - rect.left + width) / scale,
-        clientY: (e.clientY - rect.top) / scale,
-      };
+      if (touches) {
+        return {
+          clientX: (touches.clientX - rect.left + width) / scale,
+          clientY: (touches.clientY - rect.top) / scale,
+        };
+      } else {
+        return {
+          clientX: (e.clientX - rect.left + width) / scale,
+          clientY: (e.clientY - rect.top) / scale,
+        };
+      }
     } else {
-      return {
-        clientX: (e.clientX - rect.left) / scale,
-        clientY: (e.clientY - rect.top) / scale,
-      };
+      if (touches) {
+        return {
+          clientX: (touches.clientX - rect.left) / scale,
+          clientY: (touches.clientY - rect.top) / scale,
+        };
+      } else {
+        return {
+          clientX: (e.clientX - rect.left) / scale,
+          clientY: (e.clientY - rect.top) / scale,
+        };
+      }
     }
   };
 
@@ -311,11 +333,15 @@ const Drawing = ({
     return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
   };
 
+  // Delete element and update all ids
   const deleteElement = (elementId) => {
     const elementsCopy = [...elements];
     const index = elementsCopy.findIndex((element) => element.id === elementId);
     elementsCopy.splice(index, 1);
-    setElements(elementsCopy);
+    elementsCopy.forEach((element, i) => {
+      element.id = i;
+    });
+    setElements(elementsCopy, true);
   };
 
   const handleMouseDown = (e) => {
@@ -523,6 +549,25 @@ const Drawing = ({
     submitToDatabase();
   };
 
+  useEffect(() => {
+    const canvas = document.getElementById(
+      `canvas-${partId}-${session.userId}`
+    );
+    canvas.addEventListener(
+      "touchmove",
+      function (e) {
+        if (e.target == canvas) {
+          e.preventDefault();
+        }
+      },
+      false
+    );
+
+    return () => {
+      canvas.removeEventListener("touchmove", () => {});
+    };
+  }, [partId, session.userId]);
+
   return (
     <>
       <canvas
@@ -537,6 +582,9 @@ const Drawing = ({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onTouchStart={handleMouseDown}
+        onTouchMove={handleMouseMove}
+        onTouchEnd={handleMouseUp}
       />
 
       {action === "writing" && (

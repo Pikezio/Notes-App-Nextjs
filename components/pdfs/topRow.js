@@ -36,7 +36,7 @@ const TopRow = ({
           )}
         </p>
       </Col>
-      <Col lg={7}>
+      {/* <Col lg={7}>
         <div>
           <FontAwesomeIcon icon={faMagnifyingGlass} />
           <RangeSlider
@@ -69,7 +69,7 @@ const TopRow = ({
             </Button>
           )}
         </div>
-      </Col>
+      </Col> */}
     </Row>
   );
 };
