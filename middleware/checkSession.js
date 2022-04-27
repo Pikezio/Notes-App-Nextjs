@@ -5,7 +5,7 @@ export async function checkSession(context) {
   if (!session) {
     return {
       redirect: {
-        destination: "/",
+        destination: "/login",
         permanent: false,
       },
     };

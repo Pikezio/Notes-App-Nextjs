@@ -13,7 +13,6 @@ const YoutubePlayer = ({ videoUrl }) => {
   const [currentTime, setCurrentTime] = useState(0);
 
   const [volume, setVolume] = useState(0.5);
-  const [speed, setSpeed] = useState(1);
 
   const checkProgress = (progress) => {
     const time = progress.playedSeconds;
@@ -34,7 +33,6 @@ const YoutubePlayer = ({ videoUrl }) => {
         url={videoUrl}
         playing={playing}
         volume={volume}
-        playbackRate={speed}
         controls={true}
         width="100%"
         height={500}
@@ -63,22 +61,6 @@ const YoutubePlayer = ({ videoUrl }) => {
               max={1}
               step={0.01}
               onChange={(e) => setVolume(e.target.value)}
-            />
-          </Col>
-        </Form.Group>
-        <Form.Group as={Row}>
-          <Col>
-            <Form.Label column sm={4} className="border rounded">
-              <span>Greitis</span>
-            </Form.Label>
-          </Col>
-          <Col sm={9}>
-            <RangeSlider
-              value={speed}
-              min={0}
-              max={1}
-              step={0.5}
-              onChange={(e) => setSpeed(e.target.value)}
             />
           </Col>
         </Form.Group>

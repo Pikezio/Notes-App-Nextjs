@@ -7,6 +7,7 @@ import { server } from "../../../util/urlConfig";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { Container, Form, Button } from "react-bootstrap";
+import { checkSession } from "../../../middleware/checkSession";
 
 const EditCollective = ({ collective, collectiveId }) => {
   const createdDate = new Date(collective.createdAt).toLocaleString("lt-LT");
@@ -158,15 +159,8 @@ const EditCollective = ({ collective, collectiveId }) => {
 export default EditCollective;
 
 export async function getServerSideProps(context) {
-  const session = await getSession(context);
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
+  const hasSession = await checkSession(context);
+  if (hasSession != null) return hasSession;
 
   const collective = await JSON.parse(
     await getCollective(context.query.collectiveId)

@@ -5,11 +5,11 @@ import { server } from "../../util/urlConfig";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { Badge, Button, Container, ListGroup } from "react-bootstrap";
+import { checkSession } from "../../middleware/checkSession";
 
 function ListOfAllCollectives({ collectives }) {
-  console.log(collectives);
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const submitJoin = async (collectiveId) => {
     await axios.post(`${server}/api/collectives/${collectiveId}/join`, {
       userId: session.userId,
@@ -53,16 +53,10 @@ function ListOfAllCollectives({ collectives }) {
 }
 
 export async function getServerSideProps(context) {
-  const session = await getSession(context);
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
+  const hasSession = await checkSession(context);
+  if (hasSession != null) return hasSession;
 
+  const session = await getSession(context);
   const response = await getAllCollectives(session.userId);
   const data = JSON.parse(response);
 

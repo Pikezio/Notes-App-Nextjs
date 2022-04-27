@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { Document, pdfjs } from "react-pdf";
 import { useContainerDimensions } from "../../util/useContainerDimensions";
@@ -6,7 +6,9 @@ import useWindowDimensions from "../../util/useWindowDimensions";
 import Drawing from "../drawing";
 import DrawingButtons from "../Drawing/drawingButtons";
 import PDFPage from "./page";
-import TopRow from "./topRow";
+import styles from "../pdfs/TopRow.module.scss";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMaximize, faX } from "@fortawesome/free-solid-svg-icons";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -55,8 +57,17 @@ export default function PDFViewer({ file, partId, defaultNoteHeight }) {
     setPageNumber(pageNumber);
   }
 
+  const [renderedPageNumber, setRenderedPageNumber] = useState(null);
+  const [renderedWidth, setRenderedWidth] = useState(null);
+
+  const isLoading =
+    renderedPageNumber !== pageNumber || renderedWidth !== noteWidth;
+  console.log(isLoading);
+
   function onRenderSuccess() {
     window.dispatchEvent(new Event("resize"));
+    setRenderedPageNumber(pageNumber);
+    setRenderedWidth(noteWidth);
   }
 
   function changePage(offset) {
@@ -71,33 +82,17 @@ export default function PDFViewer({ file, partId, defaultNoteHeight }) {
     showTwoPages ? changePage(2) : changePage(1);
   }
 
-  const lineClick = () => {
-    setAction("line");
-  };
-
-  const squareClick = () => {
-    setAction("rectangle");
-  };
-
-  const cursorClick = () => {
-    setAction("selection");
-  };
-
-  const pencilClick = () => {
-    setAction("pencil");
-  };
-
-  const textClick = () => {
-    setAction("text");
-  };
-
-  const deleteClick = () => {
-    setAction("eraser");
+  const toolClick = (tool) => {
+    if (action === tool) {
+      setAction("none");
+    } else {
+      setAction(tool);
+    }
   };
 
   const viewer = (
     <div>
-      <div className="mb-2">
+      {/* <div className="mb-2">
         <TopRow
           numPages={numPages}
           showTwoPages={showTwoPages}
@@ -108,8 +103,22 @@ export default function PDFViewer({ file, partId, defaultNoteHeight }) {
           setFullscreen={setFullscreen}
           topMenu={topMenu}
         />
-      </div>
-      <div className="d-flex align-items-center justify-content-center">
+      </div> */}
+      <div
+        className={`d-flex align-items-center justify-content-center ${styles.sticky}`}
+      >
+        <p className="h5">
+          {showTwoPages ? (
+            <>
+              Lapai ({pageNumber || (numPages ? 1 : "--")} - {pageNumber + 1})
+              iš {numPages || "--"}
+            </>
+          ) : (
+            <>
+              Lapas {pageNumber || (numPages ? 1 : "--")} iš {numPages || "--"}
+            </>
+          )}
+        </p>
         <Button
           className="mx-2"
           disabled={pageNumber <= 1}
@@ -117,13 +126,14 @@ export default function PDFViewer({ file, partId, defaultNoteHeight }) {
         >
           ⬅️
         </Button>
+
         <DrawingButtons
-          line={lineClick}
-          square={squareClick}
-          cursor={cursorClick}
-          pencil={pencilClick}
-          text={textClick}
-          erase={deleteClick}
+          line={() => toolClick("line")}
+          square={() => toolClick("rectangle")}
+          cursor={() => toolClick("selection")}
+          pencil={() => toolClick("pencil")}
+          text={() => toolClick("text")}
+          erase={() => toolClick("eraser")}
           selected={action}
         />
         <Button
@@ -135,6 +145,17 @@ export default function PDFViewer({ file, partId, defaultNoteHeight }) {
         >
           ➡️
         </Button>
+        <div className="d-flex align-items-center">
+          {fullscreen ? (
+            <Button variant="danger" onClick={() => setFullscreen(false)}>
+              <FontAwesomeIcon icon={faX} />
+            </Button>
+          ) : (
+            <Button variant="light" onClick={() => setFullscreen(true)}>
+              <FontAwesomeIcon icon={faMaximize} />
+            </Button>
+          )}
+        </div>
       </div>
       <div className="d-flex justify-content-center">
         <div style={{ position: "relative", zIndex: 0 }}>
@@ -161,17 +182,21 @@ export default function PDFViewer({ file, partId, defaultNoteHeight }) {
                   <PDFPage
                     height={noteHeight}
                     {...(dynamicWidth && { width })}
-                    scale={zoom}
                     pageNumber={pageNumber}
                     onRenderSuccess={onRenderSuccess}
+                    isLoading={isLoading}
+                    renderedPageNumber={renderedPageNumber}
+                    renderedWidth={renderedWidth}
                   />
                   {pageNumber + 1 <= numPages && (
                     <PDFPage
                       height={noteHeight}
                       {...(dynamicWidth && { width })}
-                      scale={zoom}
                       pageNumber={pageNumber + 1}
                       onRenderSuccess={onRenderSuccess}
+                      isLoading={isLoading}
+                      renderedPageNumber={renderedPageNumber}
+                      renderedWidth={renderedWidth}
                     />
                   )}
                 </div>
@@ -180,9 +205,11 @@ export default function PDFViewer({ file, partId, defaultNoteHeight }) {
                   <PDFPage
                     height={noteHeight}
                     {...(dynamicWidth && { width })}
-                    scale={zoom}
                     pageNumber={pageNumber}
                     onRenderSuccess={onRenderSuccess}
+                    isLoading={isLoading}
+                    renderedPageNumber={renderedPageNumber}
+                    renderedWidth={renderedWidth}
                   />
                 </div>
               )}
@@ -200,7 +227,7 @@ export default function PDFViewer({ file, partId, defaultNoteHeight }) {
         fullscreen={true}
         onHide={() => setFullscreen(false)}
       >
-        <Modal.Body>{viewer}</Modal.Body>
+        <Modal.Body className="p-0">{viewer}</Modal.Body>
       </Modal>
     );
   } else {

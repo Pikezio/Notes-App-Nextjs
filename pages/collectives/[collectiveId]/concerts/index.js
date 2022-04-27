@@ -1,13 +1,15 @@
 import axios from "axios";
 import moment from "moment";
+import { getSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 import { Button, Container, ListGroup, ListGroupItem } from "react-bootstrap";
 import { getConcertsByCollectiveId } from "../../../../controllers/concertController";
 import { checkSession } from "../../../../middleware/checkSession";
+import { isOwner } from "../../../../middleware/isUserCollectiveOwner";
 
-const Concerts = ({ concerts }) => {
+const Concerts = ({ concerts, owner }) => {
   const router = useRouter();
   const { collectiveId } = router.query;
 
@@ -63,11 +65,13 @@ const Concerts = ({ concerts }) => {
             </Link>
           ))}
       </ListGroup>
-      <Link href={`/collectives/${collectiveId}/concerts/create`} passHref>
-        <Button variant="dark" className="mt-2">
-          Pridėti koncertą
-        </Button>
-      </Link>
+      {owner && (
+        <Link href={`/collectives/${collectiveId}/concerts/create`} passHref>
+          <Button variant="dark" className="mt-2">
+            Pridėti koncertą
+          </Button>
+        </Link>
+      )}
     </Container>
   );
 };
@@ -82,9 +86,13 @@ export async function getServerSideProps(context) {
     await getConcertsByCollectiveId(context.query.collectiveId)
   );
 
+  const session = await getSession(context);
+  const owner = await isOwner(context.query.collectiveId, session.userId);
+
   return {
     props: {
       concerts,
+      owner,
     },
   };
 }

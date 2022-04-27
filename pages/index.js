@@ -3,6 +3,7 @@ import { getCollectives } from "../controllers/collectiveController";
 import ListOfCollectives from "../components/collectiveList";
 import Calendar from "../components/calendar";
 import { getCollectiveConcerts } from "../controllers/concertController";
+import { checkSession } from "../middleware/checkSession";
 
 export default function Home({ owned, member, concerts }) {
   return (
@@ -15,16 +16,10 @@ export default function Home({ owned, member, concerts }) {
 
 export async function getServerSideProps(context) {
   // Check session and redirect if not logged in.
+  const hasSession = await checkSession(context);
+  if (hasSession != null) return hasSession;
 
   const session = await getSession(context);
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/nextauth/login",
-        permanent: false,
-      },
-    };
-  }
 
   const response = await getCollectives(session.userId);
   const data = JSON.parse(response).data;

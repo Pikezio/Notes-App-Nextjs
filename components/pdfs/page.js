@@ -1,17 +1,36 @@
 import React from "react";
 import { Page } from "react-pdf";
 
-const PDFPage = ({ pageNumber, height, scale, onRenderSuccess, width }) => {
+const PDFPage = ({
+  pageNumber,
+  height,
+  onRenderSuccess,
+  width,
+  isLoading,
+  renderedPageNumber,
+  renderedWidth,
+}) => {
+  console.log("Width", width);
   return (
-    <Page
-      pageNumber={pageNumber}
-      renderAnnotationLayer={false}
-      renderTextLayer={false}
-      height={height}
-      width={width}
-      scale={scale}
-      onRenderSuccess={onRenderSuccess}
-    ></Page>
+    <>
+      {/* {isLoading && renderedPageNumber && renderedWidth ? (
+        <Page
+          pageNumber={renderedPageNumber}
+          height={height}
+          width={renderedWidth}
+          renderAnnotationLayer={false}
+          renderTextLayer={false}
+        />
+      ) : null} */}
+      <Page
+        pageNumber={pageNumber}
+        height={height}
+        width={width}
+        onRenderSuccess={onRenderSuccess}
+        renderAnnotationLayer={false}
+        renderTextLayer={false}
+      />
+    </>
   );
 };
 

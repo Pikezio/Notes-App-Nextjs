@@ -9,7 +9,6 @@ import { useRecoilState } from "recoil";
 import { getSession } from "next-auth/react";
 import axios from "axios";
 import { isMember } from "../../../middleware/isUserCollectiveMember";
-import { server } from "../../../util/urlConfig";
 import { instrumentState } from "../../../atoms";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -19,9 +18,9 @@ import {
   Form,
   ListGroup,
   Button,
-  Badge,
 } from "react-bootstrap";
 import ModifyMembers from "../../../components/modifyMembers";
+import { checkSession } from "../../../middleware/checkSession";
 
 function Collective({ data, collective }) {
   const router = useRouter();
@@ -70,16 +69,21 @@ function Collective({ data, collective }) {
             <h1>{collective.title}</h1>
           </div>
           <div className="d-flex">
-            <Link href={`${collectiveId}/instruments`} passHref>
-              <Button variant="dark" className="mx-2 my-1">
-                Redaguoti instrumentus
-              </Button>
-            </Link>
-            <Link href={`${collectiveId}/edit`} passHref>
-              <Button variant="dark" className="mx-2 my-1">
-                Redaguoti kolektyvą
-              </Button>
-            </Link>
+            {data.owner && (
+              <>
+                <Link href={`${collectiveId}/instruments`} passHref>
+                  <Button variant="dark" className="mx-2 my-1">
+                    Redaguoti instrumentus
+                  </Button>
+                </Link>
+                <Link href={`${collectiveId}/edit`} passHref>
+                  <Button variant="dark" className="mx-2 my-1">
+                    Redaguoti kolektyvą
+                  </Button>
+                </Link>
+              </>
+            )}
+
             <Link href={`${collectiveId}/concerts`} passHref>
               <Button variant="dark" className="mx-2 my-1">
                 Koncertai
@@ -163,7 +167,6 @@ function Collective({ data, collective }) {
                 <Button variant="dark">Pridėti kūrinį</Button>
               </Link>
             </div>
-            {console.log(data)}
             <ModifyMembers users={data.users} />
           </div>
         )}
@@ -178,15 +181,10 @@ export async function getServerSideProps(context) {
   let owner = false;
   let member = false;
   let data = {};
+  const hasSession = await checkSession(context);
+  if (hasSession != null) return hasSession;
+
   const session = await getSession(context);
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
 
   const { collectiveId } = context.query;
   const collectiveOwner = await getCollectiveOwner(collectiveId);
